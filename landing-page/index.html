@@ -1,0 +1,316 @@
+# 🚀 部署到 Cloudflare Pages 指南
+
+## 📋 前提条件
+
+- Cloudflare 账号（免费）
+- 自定义域名（已在 Cloudflare 管理 DNS）
+- GitHub 仓库（已完成）
+
+## ⚠️ 重要说明
+
+**本项目是全栈应用**（前端 + 后端），但 Cloudflare Pages 只能部署**静态前端**。
+
+有两种部署方案：
+
+### 方案 A：仅部署前端展示页面（推荐用于展示）
+- 部署静态前端到 Cloudflare Pages
+- 制作一个项目介绍页面
+- 提供下载链接让用户本地运行
+
+### 方案 B：前后端分离部署（推荐用于实际使用）
+- 前端部署到 Cloudflare Pages
+- 后端部署到其他服务（Railway、Render、fly.io 等）
+- 配置 CORS 连接前后端
+
+## 🎯 方案 A：部署静态展示页面（最简单）
+
+### 步骤 1：创建展示页面
+
+<function_calls>
+<invoke name="Write">
+<parameter name="content"><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workbench - 本地 AI 创作工具</title>
+    <meta name="description" content="本地 AI 创作工具 - 生成演示文稿、学术海报、网页展示和文档">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .hero {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 40px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .feature {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature h3 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tech-stack {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+        }
+
+        .tech-stack h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #667eea;
+        }
+
+        .tech-items {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tech-item {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            padding: 20px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            .tagline {
+                font-size: 1.1em;
+            }
+            .hero {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🎨</div>
+            <h1>AI Workbench</h1>
+            <p class="tagline">本地 AI 创作工具 - 生成演示文稿、学术海报、网页展示和文档</p>
+        </header>
+
+        <div class="hero">
+            <h2 style="text-align: center; margin-bottom: 30px;">✨ 核心功能</h2>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <h3>论文演示</h3>
+                    <p>论文、实验图转组会/答辩 PPT</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>学术海报</h3>
+                    <p>会议海报和打印文件（PDF）</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌐</div>
+                    <h3>网页演示</h3>
+                    <p>主题素材生成单页 HTML 展示</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔄</div>
+                    <h3>AI 二次处理</h3>
+                    <p>对生成文件进行注释和再加工</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📁</div>
+                    <h3>自定义路径</h3>
+                    <p>指定文件保存位置</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>快速配置</h3>
+                    <p>一键设置常用参数</p>
+                </div>
+            </div>
+
+            <div class="cta-buttons">
+                <a href="https://github.com/hhzz-svg/ai-workbench" class="btn btn-primary" target="_blank">
+                    ⭐ GitHub 仓库
+                </a>
+                <a href="https://github.com/hhzz-svg/ai-workbench/releases" class="btn btn-secondary" target="_blank">
+                    📥 下载安装
+                </a>
+            </div>
+        </div>
+
+        <div class="tech-stack">
+            <h2>🛠️ 技术栈</h2>
+            <div class="tech-items">
+                <div class="tech-item">React 18</div>
+                <div class="tech-item">TypeScript</div>
+                <div class="tech-item">FastAPI</div>
+                <div class="tech-item">Python 3.10+</div>
+                <div class="tech-item">SQLite</div>
+                <div class="tech-item">Vite</div>
+            </div>
+        </div>
+
+        <div class="hero">
+            <h2 style="text-align: center; margin-bottom: 30px;">🚀 快速开始</h2>
+            <pre style="background: #f8f9fa; padding: 20px; border-radius: 10px; overflow-x: auto;">
+# 克隆仓库
+git clone https://github.com/hhzz-svg/ai-workbench.git
+cd ai-workbench
+
+# 安装依赖
+python -m pip install -r backend/requirements.txt
+npm --prefix frontend install
+
+# 启动服务
+.\start.ps1
+
+# 访问
+http://127.0.0.1:5173
+            </pre>
+        </div>
+
+        <footer>
+            <p>© 2026 AI Workbench | MIT License</p>
+            <div class="footer-links">
+                <a href="https://github.com/hhzz-svg/ai-workbench">GitHub</a>
+                <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/README.md">文档</a>
+                <a href="https://github.com/hhzz-svg/ai-workbench/issues">问题反馈</a>
+                <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/CONTRIBUTING.md">贡献指南</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
