@@ -1,40 +1,11 @@
-# 🚀 部署到 Cloudflare Pages 指南
-
-## 📋 前提条件
-
-- Cloudflare 账号（免费）
-- 自定义域名（已在 Cloudflare 管理 DNS）
-- GitHub 仓库（已完成）
-
-## ⚠️ 重要说明
-
-**本项目是全栈应用**（前端 + 后端），但 Cloudflare Pages 只能部署**静态前端**。
-
-有两种部署方案：
-
-### 方案 A：仅部署前端展示页面（推荐用于展示）
-- 部署静态前端到 Cloudflare Pages
-- 制作一个项目介绍页面
-- 提供下载链接让用户本地运行
-
-### 方案 B：前后端分离部署（推荐用于实际使用）
-- 前端部署到 Cloudflare Pages
-- 后端部署到其他服务（Railway、Render、fly.io 等）
-- 配置 CORS 连接前后端
-
-## 🎯 方案 A：部署静态展示页面（最简单）
-
-### 步骤 1：创建展示页面
-
-<function_calls>
-<invoke name="Write">
-<parameter name="content"><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Workbench - 本地 AI 创作工具</title>
     <meta name="description" content="本地 AI 创作工具 - 生成演示文稿、学术海报、网页展示和文档">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -43,146 +14,254 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1a1a1a;
+            background: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Hero Section */
+        .hero {
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: drift 20s linear infinite;
         }
 
-        header {
+        @keyframes drift {
+            from { transform: translate(-50px, -50px); }
+            to { transform: translate(0, 0); }
+        }
+
+        .hero-content {
             text-align: center;
             color: white;
-            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+            padding: 40px 20px;
+            max-width: 900px;
         }
 
         .logo {
-            font-size: 4em;
-            margin-bottom: 10px;
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
         }
 
         h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
+            font-size: 56px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
         }
 
         .tagline {
-            font-size: 1.3em;
-            opacity: 0.9;
-        }
-
-        .hero {
-            background: white;
-            border-radius: 20px;
-            padding: 60px 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            font-size: 24px;
             margin-bottom: 40px;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        .feature {
-            background: #f8f9fa;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .feature-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
-        }
-
-        .feature h3 {
-            margin-bottom: 10px;
-            color: #667eea;
+            opacity: 0.95;
+            font-weight: 400;
         }
 
         .cta-buttons {
             display: flex;
             gap: 20px;
             justify-content: center;
-            margin: 40px 0;
+            margin-top: 40px;
             flex-wrap: wrap;
         }
 
         .btn {
-            display: inline-block;
-            padding: 15px 40px;
-            border-radius: 50px;
+            padding: 18px 40px;
+            border-radius: 12px;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1em;
-            transition: all 0.3s;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .btn-primary {
-            background: #667eea;
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            background: white;
+            color: #667eea;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
         .btn-primary:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
         }
 
         .btn-secondary {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.5);
+            backdrop-filter: blur(10px);
         }
 
         .btn-secondary:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+            transform: translateY(-3px);
         }
 
-        .tech-stack {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            margin: 40px 0;
+        /* Features Section */
+        .features {
+            padding: 100px 20px;
+            background: #f8f9fa;
         }
 
-        .tech-stack h2 {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
             text-align: center;
-            margin-bottom: 30px;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 60px;
+            color: #1a1a1a;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border: 1px solid #e5e7eb;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 700;
             color: #667eea;
         }
 
-        .tech-items {
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        /* Highlights Section */
+        .highlights {
+            padding: 100px 20px;
+            background: white;
+        }
+
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .highlight-item {
+            text-align: center;
+        }
+
+        .highlight-number {
+            font-size: 48px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .highlight-text {
+            font-size: 18px;
+            color: #6b7280;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            padding: 100px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tech-grid {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 20px;
             flex-wrap: wrap;
+            margin-top: 40px;
         }
 
-        .tech-item {
-            background: #f8f9fa;
-            padding: 15px 25px;
-            border-radius: 10px;
+        .tech-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 30px;
+            border-radius: 50px;
             font-weight: 600;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        footer {
-            text-align: center;
+        /* CTA Section */
+        .cta-section {
+            padding: 100px 20px;
+            background: #1a1a1a;
             color: white;
-            margin-top: 60px;
-            padding: 20px;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 30px;
+        }
+
+        .cta-section p {
+            font-size: 20px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        footer {
+            background: #111;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
         }
 
         .footer-links {
@@ -194,123 +273,146 @@
         }
 
         .footer-links a {
-            color: white;
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
-            opacity: 0.9;
+            transition: color 0.3s;
         }
 
         .footer-links a:hover {
-            opacity: 1;
-            text-decoration: underline;
+            color: white;
         }
 
+        /* Responsive */
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-            .tagline {
-                font-size: 1.1em;
-            }
-            .hero {
-                padding: 40px 20px;
-            }
+            h1 { font-size: 36px; }
+            .tagline { font-size: 18px; }
+            .section-title { font-size: 32px; }
+            .logo { font-size: 60px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
             <div class="logo">🎨</div>
             <h1>AI Workbench</h1>
-            <p class="tagline">本地 AI 创作工具 - 生成演示文稿、学术海报、网页展示和文档</p>
-        </header>
-
-        <div class="hero">
-            <h2 style="text-align: center; margin-bottom: 30px;">✨ 核心功能</h2>
-
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-icon">📊</div>
-                    <h3>论文演示</h3>
-                    <p>论文、实验图转组会/答辩 PPT</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🖼️</div>
-                    <h3>学术海报</h3>
-                    <p>会议海报和打印文件（PDF）</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🌐</div>
-                    <h3>网页演示</h3>
-                    <p>主题素材生成单页 HTML 展示</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">🔄</div>
-                    <h3>AI 二次处理</h3>
-                    <p>对生成文件进行注释和再加工</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">📁</div>
-                    <h3>自定义路径</h3>
-                    <p>指定文件保存位置</p>
-                </div>
-                <div class="feature">
-                    <div class="feature-icon">⚡</div>
-                    <h3>快速配置</h3>
-                    <p>一键设置常用参数</p>
-                </div>
-            </div>
-
+            <p class="tagline">本地 AI 创作工具<br>让 AI 帮你生成演示文稿、学术海报、网页展示和文档</p>
             <div class="cta-buttons">
                 <a href="https://github.com/hhzz-svg/ai-workbench" class="btn btn-primary" target="_blank">
-                    ⭐ GitHub 仓库
+                    ⭐ 查看源码
                 </a>
                 <a href="https://github.com/hhzz-svg/ai-workbench/releases" class="btn btn-secondary" target="_blank">
-                    📥 下载安装
+                    📥 下载使用
                 </a>
             </div>
         </div>
+    </section>
 
-        <div class="tech-stack">
-            <h2>🛠️ 技术栈</h2>
-            <div class="tech-items">
-                <div class="tech-item">React 18</div>
-                <div class="tech-item">TypeScript</div>
-                <div class="tech-item">FastAPI</div>
-                <div class="tech-item">Python 3.10+</div>
-                <div class="tech-item">SQLite</div>
-                <div class="tech-item">Vite</div>
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">✨ 核心功能</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>论文演示</h3>
+                    <p>将论文、实验图转换成精美的组会或答辩 PPT，自动提取关键信息和数据</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🖼️</div>
+                    <h3>学术海报</h3>
+                    <p>生成专业的学术会议海报，支持 PDF 导出，适合打印和展示</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>网页演示</h3>
+                    <p>创建单页 HTML 展示，适合在线分享和浏览器演示</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>AI 二次处理</h3>
+                    <p>对生成的文件进行注释和再加工，持续优化直到满意</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📁</div>
+                    <h3>自定义路径</h3>
+                    <p>指定文件保存位置，方便管理和组织你的创作内容</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>快速配置</h3>
+                    <p>一键设置常用参数，中文 PPT、英文海报、网页演示快速切换</p>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div class="hero">
-            <h2 style="text-align: center; margin-bottom: 30px;">🚀 快速开始</h2>
-            <pre style="background: #f8f9fa; padding: 20px; border-radius: 10px; overflow-x: auto;">
-# 克隆仓库
-git clone https://github.com/hhzz-svg/ai-workbench.git
-cd ai-workbench
-
-# 安装依赖
-python -m pip install -r backend/requirements.txt
-npm --prefix frontend install
-
-# 启动服务
-.\start.ps1
-
-# 访问
-http://127.0.0.1:5173
-            </pre>
-        </div>
-
-        <footer>
-            <p>© 2026 AI Workbench | MIT License</p>
-            <div class="footer-links">
-                <a href="https://github.com/hhzz-svg/ai-workbench">GitHub</a>
-                <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/README.md">文档</a>
-                <a href="https://github.com/hhzz-svg/ai-workbench/issues">问题反馈</a>
-                <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/CONTRIBUTING.md">贡献指南</a>
+    <!-- Highlights -->
+    <section class="highlights">
+        <div class="container">
+            <h2 class="section-title">🚀 为什么选择 AI Workbench</h2>
+            <div class="highlight-grid">
+                <div class="highlight-item">
+                    <div class="highlight-number">🔒</div>
+                    <div class="highlight-text">本地运行<br>数据隐私安全</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-number">⚡</div>
+                    <div class="highlight-text">快速配置<br>节省时间</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-number">🎨</div>
+                    <div class="highlight-text">精美设计<br>专业输出</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-number">🆓</div>
+                    <div class="highlight-text">完全开源<br>MIT 许可</div>
+                </div>
             </div>
-        </footer>
-    </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="tech-stack">
+        <div class="container">
+            <h2 class="section-title">🛠️ 技术栈</h2>
+            <div class="tech-grid">
+                <div class="tech-badge">React 18</div>
+                <div class="tech-badge">TypeScript</div>
+                <div class="tech-badge">FastAPI</div>
+                <div class="tech-badge">Python 3.10+</div>
+                <div class="tech-badge">SQLite</div>
+                <div class="tech-badge">Vite</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>准备好开始了吗？</h2>
+            <p>免费开源，5 分钟即可上手使用</p>
+            <div class="cta-buttons">
+                <a href="https://github.com/hhzz-svg/ai-workbench" class="btn btn-primary" target="_blank">
+                    ⭐ Star on GitHub
+                </a>
+                <a href="https://github.com/hhzz-svg/ai-workbench/releases" class="btn btn-secondary" target="_blank">
+                    📥 下载使用
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 AI Workbench | MIT License</p>
+        <div class="footer-links">
+            <a href="https://github.com/hhzz-svg/ai-workbench" target="_blank">GitHub</a>
+            <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/README.md" target="_blank">文档</a>
+            <a href="https://github.com/hhzz-svg/ai-workbench/issues" target="_blank">问题反馈</a>
+            <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/CONTRIBUTING.md" target="_blank">贡献指南</a>
+        </div>
+    </footer>
 </body>
 </html>
