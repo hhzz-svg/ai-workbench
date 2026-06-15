@@ -74,6 +74,7 @@ const applyTemplate = (template: ProductTemplate) => {
 - ✅ 支持自定义路径（如 `C:\Users\Documents\outputs`）
 - ✅ 留空则使用默认输出目录
 - ✅ 路径信息会传递到后端 `options.outputPath`
+- ✅ 后端校验绝对路径并在任务完成后复制最终产物
 
 **UI**：
 ```
@@ -100,7 +101,7 @@ const applyTemplate = (template: ProductTemplate) => {
    请将这个海报的配色改为蓝色系
    ```
 3. 点击 **[提交处理]** 按钮
-4. AI 进行二次处理（后端 API 待实现）
+4. 后端创建新的二次处理任务，任务完成后生成新产物
 
 **支持的文件类型**：
 - ✅ 图片（image）
@@ -132,7 +133,7 @@ const [processingAnnotation, setProcessingAnnotation] = useState(false);  // 处
 // 创建任务时传递输出路径
 options.outputPath = outputPath.trim();
 
-// 注释处理（待后端实现）
+// 注释处理
 async function handleAnnotationSubmit() {
   // POST /api/artifacts/{artifactId}/annotate
   // Body: { annotation: string }
@@ -174,7 +175,7 @@ async function handleAnnotationSubmit() {
 
 ## 后续工作 📋
 
-### 后端 API 需要实现
+### 后端 API 已补齐
 
 1. **输出路径支持**
    ```python
@@ -183,9 +184,8 @@ async function handleAnnotationSubmit() {
    async def create_job(payload: JobPayload):
        output_path = payload.options.get("outputPath")
        if output_path:
-           # 验证路径是否合法
-           # 设置生成任务的输出目录
-           pass
+           # 验证路径是否合法，并在任务完成后复制产物
+           ...
    ```
 
 2. **注释处理接口**
@@ -193,17 +193,20 @@ async function handleAnnotationSubmit() {
    @router.post("/artifacts/{artifact_id}/annotate")
    async def annotate_artifact(artifact_id: str, annotation: str):
        # 读取原文件
-       # 根据注释调用 AI 重新处理
-       # 生成新的产物
-       # 返回新产物 ID
-       pass
+       # 创建新的二次处理任务
+       # 返回新任务 ID
+       ...
    ```
 
-3. **注释历史记录**（可选）
+### 仍建议继续加强
+
+1. **注释历史记录**（可选）
    ```python
    # 记录每个产物的注释历史
    # 支持查看和回滚
    ```
+2. **远端部署账号体系**（商业化需要）
+3. **任务配额、支付和成本统计**（商业化需要）
 
 ## 使用指南 📖
 
@@ -228,10 +231,10 @@ async function handleAnnotationSubmit() {
 
 ## 已知限制 ⚠️
 
-1. **注释功能**：前端 UI 已完成，后端处理逻辑待实现
-2. **路径验证**：前端不验证路径合法性，由后端验证
-3. **注释支持**：仅支持 image/html/pdf 类型文件
-4. **并发处理**：多个注释任务可能需要排队处理
+1. **路径验证**：前端不验证路径合法性，由后端验证
+2. **注释入口**：仅在 image/html/pdf 类型文件上显示
+3. **并发处理**：多个注释任务需要排队处理
+4. **完整在线商业化**：还需要登录、计费、任务隔离和云存储
 
 ## 版本对比
 

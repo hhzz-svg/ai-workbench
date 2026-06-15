@@ -89,7 +89,7 @@ class JobManager:
                 self._emit(job.id, {"type": "job.finished", "message": "Job canceled."})
                 return
 
-            artifacts = self._record_artifacts(job.id, adapter.scan_artifacts(workspace))
+            artifacts = self._record_artifacts(job, adapter.scan_artifacts(workspace))
             if result.code != 0:
                 detail = result.stderr.strip().splitlines()[-1] if result.stderr.strip() else ""
                 error = f"Codex exited with code {result.code}" + (f": {detail}" if detail else "")
@@ -122,13 +122,14 @@ class JobManager:
                 copied.append(target)
         return copied
 
-    def _record_artifacts(self, job_id: str, artifacts: list[Artifact]) -> list[Artifact]:
-        self.store.clear_artifacts(job_id)
+    def _record_artifacts(self, job: Job, artifacts: list[Artifact]) -> list[Artifact]:
+        self.store.clear_artifacts(job.id)
         recorded: list[Artifact] = []
         for artifact in artifacts:
+            artifact = self._publish_artifact(job, artifact)
             recorded.append(
                 self.store.add_artifact(
-                    job_id=job_id,
+                    job_id=job.id,
                     name=artifact.name,
                     path=artifact.path,
                     kind=artifact.kind,
@@ -136,6 +137,30 @@ class JobManager:
                 )
             )
         return recorded
+
+    def _publish_artifact(self, job: Job, artifact: Artifact) -> Artifact:
+        output_path = job.options.get("outputPath")
+        if not isinstance(output_path, str) or not output_path.strip():
+            return artifact
+        output_dir = Path(output_path).expanduser()
+        if not output_dir.is_absolute():
+            return artifact
+
+        source = Path(artifact.path)
+        if not source.exists():
+            return artifact
+
+        relative_path = Path(artifact.name)
+        if job.workspace:
+            try:
+                relative_path = source.resolve().relative_to(Path(job.workspace).resolve())
+            except ValueError:
+                relative_path = Path(artifact.name)
+        target = output_dir / relative_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.resolve() != target.resolve():
+            shutil.copy2(source, target)
+        return artifact.model_copy(update={"path": str(target), "size": target.stat().st_size})
 
     @staticmethod
     def _needs_input(workspace: Path) -> bool:

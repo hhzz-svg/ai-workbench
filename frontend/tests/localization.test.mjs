@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const main = readFileSync(join(root, "src", "main.tsx"), "utf8");
+const api = readFileSync(join(root, "src", "api.ts"), "utf8");
 const html = readFileSync(join(root, "index.html"), "utf8");
 
 for (const text of [
@@ -33,3 +34,4 @@ for (const text of ["自动 Skill", "Skill 路由", "Codex Skill 生成器"]) {
 }
 assert.ok(html.includes('lang="zh-CN"'), "Expected index.html to use zh-CN language");
 assert.ok(html.includes("<title>创作工作台</title>"), "Expected document title to be Chinese");
+assert.ok(api.includes("import.meta.env.VITE_API_BASE"), "Expected API client to support VITE_API_BASE for hosted frontends");

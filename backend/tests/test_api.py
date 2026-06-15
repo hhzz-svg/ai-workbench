@@ -154,6 +154,42 @@ def test_create_job_enqueues_pending_job(tmp_path):
     assert body["status"] == "pending"
 
 
+def test_create_job_rejects_non_string_output_path(tmp_path):
+    app = create_app(data_dir=tmp_path, start_worker=False)
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/jobs",
+        json={
+            "skillType": "auto",
+            "prompt": "polish this abstract into Nature style English",
+            "fileIds": [],
+            "options": {"outputPath": 123},
+            "providerProfileId": None,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "输出路径" in response.json()["detail"]
+
+
+def test_create_app_allows_cors_origins_from_environment(tmp_path, monkeypatch):
+    monkeypatch.setenv("SKILL_WORKBENCH_CORS_ORIGINS", "https://workbench.example.com, https://ai-workbench.pages.dev")
+    app = create_app(data_dir=tmp_path, start_worker=False)
+    client = TestClient(app)
+
+    response = client.options(
+        "/api/health",
+        headers={
+            "Origin": "https://workbench.example.com",
+            "Access-Control-Request-Method": "GET",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://workbench.example.com"
+
+
 def test_app_marks_interrupted_jobs_failed_on_startup(tmp_path):
     app = create_app(data_dir=tmp_path, start_worker=False)
     store = app.state.store

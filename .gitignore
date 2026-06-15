@@ -56,6 +56,9 @@ frontend/*.local
 *~
 .DS_Store
 
+# Local tooling / preview config
+.claude/
+
 # Application data
 .skill-workbench/
 outputs/

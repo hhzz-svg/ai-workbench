@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -26,8 +27,20 @@ from .store import Store
 from .utils import new_id
 
 
+DEFAULT_CORS_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
+
+
 def default_data_dir() -> Path:
     return Path.home() / ".skill-workbench"
+
+
+def cors_origins_from_env() -> list[str]:
+    configured = [
+        origin.strip().rstrip("/")
+        for origin in os.getenv("SKILL_WORKBENCH_CORS_ORIGINS", "").split(",")
+        if origin.strip()
+    ]
+    return list(dict.fromkeys([*DEFAULT_CORS_ORIGINS, *configured]))
 
 
 def create_app(data_dir: Path | None = None, start_worker: bool = True) -> FastAPI:
@@ -41,7 +54,7 @@ def create_app(data_dir: Path | None = None, start_worker: bool = True) -> FastA
     app = FastAPI(title="Skill Workbench", version="0.1.0")
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+        allow_origins=cors_origins_from_env(),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -142,8 +155,11 @@ def create_app(data_dir: Path | None = None, start_worker: bool = True) -> FastA
 
         # 处理自定义输出路径
         options = payload.options.copy()
-        if "outputPath" in options:
-            output_path = Path(options["outputPath"])
+        if options.get("outputPath"):
+            raw_output_path = options["outputPath"]
+            if not isinstance(raw_output_path, str):
+                raise HTTPException(status_code=400, detail="输出路径必须是文本格式的绝对路径")
+            output_path = Path(raw_output_path.strip()).expanduser()
             # 验证路径
             if not output_path.is_absolute():
                 raise HTTPException(status_code=400, detail="输出路径必须是绝对路径")
@@ -152,6 +168,7 @@ def create_app(data_dir: Path | None = None, start_worker: bool = True) -> FastA
                 output_path.mkdir(parents=True, exist_ok=True)
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"无法创建输出目录：{str(e)}")
+            options["outputPath"] = str(output_path)
 
         job = store.create_job(
             skill_type=skill_type,

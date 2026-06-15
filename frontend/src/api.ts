@@ -8,7 +8,7 @@ import type {
   UploadedFile
 } from "./types";
 
-export const API_BASE = "";
+export const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
