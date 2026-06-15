@@ -6,6 +6,20 @@
 
 本地 Web 工作台，把资料和需求生成演示文稿、学术润色稿、网页演示和海报。数据完全本地化，隐私安全可控。
 
+## 🌐 在线展示页
+
+展示页地址：**https://ai-workbench-cvs.pages.dev/**
+
+> 说明：这个地址只是项目介绍和下载入口，不是在线版工作台。当前完整程序需要下载到本地运行，任务执行、模型配置、上传文件和生成结果都保存在自己的电脑上。
+
+## 🖥️ 当前使用方式
+
+AI Workbench 目前是本地应用，不是云端 SaaS。你需要在电脑上启动后端和前端，然后访问本地地址使用。
+
+- 本地工作台地址：`http://127.0.0.1:5173`
+- 后端 API 文档：`http://127.0.0.1:8000/docs`
+- 数据保存位置：`~/.skill-workbench`
+
 ## ✨ 功能特性
 
 ### 支持的创作类型
@@ -24,7 +38,14 @@
 
 ## 🚀 快速开始
 
-### 安装依赖
+### 1. 克隆仓库
+
+```powershell
+git clone https://github.com/hhzz-svg/ai-workbench.git
+cd ai-workbench
+```
+
+### 2. 安装依赖
 
 ```powershell
 # 安装后端依赖
@@ -34,7 +55,7 @@ python -m pip install -r backend\requirements.txt
 npm --prefix frontend install
 ```
 
-### 本机使用
+### 3. 本机使用
 
 ```powershell
 .\start.ps1
@@ -42,7 +63,7 @@ npm --prefix frontend install
 
 打开 `http://127.0.0.1:5173`。
 
-### 局域网使用
+### 4. 局域网使用
 
 同一网络里的其他人要访问这台电脑上的工作台，可以运行：
 
@@ -51,6 +72,25 @@ npm --prefix frontend install
 ```
 
 脚本会显示可访问地址，例如 `http://192.168.1.20:5173`。别人只打开网页，真正的模型配置、任务执行和文件仍在这台电脑上。
+
+## ☁️ Cloudflare Pages 部署说明
+
+Cloudflare Pages 当前部署的是 `landing-page/` 里的静态展示页。完整工作台包含 FastAPI 后端，不能只靠 Pages 直接在线运行。
+
+当前展示页配置：
+
+```text
+Project name: ai-workbench
+Production branch: main
+Framework preset: None
+Build command: 留空
+Build output directory: landing-page
+Root directory: 留空
+```
+
+部署完成后的展示地址：`https://ai-workbench-cvs.pages.dev/`
+
+如果未来要做真正在线版，需要把前端部署到 Cloudflare Pages，把后端部署到 Railway、Render、Fly.io 或自己的服务器，并配置 `VITE_API_BASE` 和 `SKILL_WORKBENCH_CORS_ORIGINS`。
 
 ## 📖 使用指南
 

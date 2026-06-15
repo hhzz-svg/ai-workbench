@@ -81,6 +81,22 @@
             font-weight: 400;
         }
 
+        .notice {
+            margin: 0 auto 28px;
+            max-width: 760px;
+            padding: 16px 22px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.16);
+            border: 1px solid rgba(255,255,255,0.34);
+            color: rgba(255,255,255,0.96);
+            font-size: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .notice strong {
+            color: white;
+        }
+
         .cta-buttons {
             display: flex;
             gap: 20px;
@@ -298,6 +314,7 @@
             <div class="logo">🎨</div>
             <h1>AI Workbench</h1>
             <p class="tagline">本地 AI 创作工具<br>让 AI 帮你生成演示文稿、学术海报、网页展示和文档</p>
+            <p class="notice"><strong>当前页面是项目展示页。</strong>完整工作台需要下载到本地运行，模型配置、上传资料和生成结果都保存在自己的电脑上。</p>
             <div class="cta-buttons">
                 <a href="https://github.com/hhzz-svg/ai-workbench" class="btn btn-primary" target="_blank">
                     ⭐ 查看源码
