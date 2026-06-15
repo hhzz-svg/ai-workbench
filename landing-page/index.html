@@ -6,7 +6,7 @@
     <title>AI Workbench - 本地 AI 创作工作台</title>
     <meta name="description" content="AI Workbench 是一个本地运行的 AI 创作工作台，统一调用 PPT、论文润色、学术海报、视觉海报和网页演示等 Skill 接口。">
     <link rel="preload" href="assets/workbench-console-wide.png" as="image">
-    <link rel="preload" href="assets/academic-poster.jpg" as="image">
+    <link rel="preload" href="assets/mondo-sapiens.jpg" as="image">
     <style>
         :root {
             --ink: #15211f;
@@ -420,48 +420,99 @@
             font-size: 14px;
         }
 
-        .poster-section {
+        .scene-gallery {
             display: grid;
-            grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1fr);
-            gap: 48px;
-            align-items: center;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
         }
 
-        .poster-copy h2 {
-            margin-bottom: 18px;
-        }
-
-        .poster-copy p {
-            margin: 0 0 26px;
-            color: var(--muted);
-            font-size: 16px;
-        }
-
-        .poster-points {
-            display: grid;
-            gap: 14px;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .poster-points li {
-            padding-left: 18px;
-            border-left: 3px solid var(--teal);
-            color: #314541;
-            font-weight: 700;
-        }
-
-        .poster-frame {
+        .scene-card,
+        .research-card {
             border: 1px solid var(--line);
             border-radius: 8px;
             overflow: hidden;
-            background: #ffffff;
-            box-shadow: 0 24px 70px rgba(21, 33, 31, 0.13);
+            background: var(--paper);
         }
 
-        .poster-frame img {
+        .scene-card.primary {
+            grid-column: span 2;
+        }
+
+        .scene-image {
+            aspect-ratio: 16 / 9;
+            background: #eef2f1;
+            overflow: hidden;
+        }
+
+        .scene-image.tall {
+            aspect-ratio: 4 / 5;
+        }
+
+        .scene-image img {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scene-body,
+        .research-body {
+            padding: 18px;
+        }
+
+        .scene-body h3,
+        .research-body h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+            line-height: 1.35;
+        }
+
+        .scene-body p,
+        .research-body p,
+        .source-note {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .prompt {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f4f7f6;
+            color: #314541;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .prompt strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--teal-dark);
+            font-size: 12px;
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .research-preview {
+            height: 620px;
+            background: #f4f6f5;
+            overflow: hidden;
+        }
+
+        .research-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .source-note {
+            margin-top: 16px;
+            text-align: right;
         }
 
         .local-band {
@@ -578,9 +629,14 @@
 
             .section-header,
             .visual-grid,
-            .poster-section,
+            .scene-gallery,
+            .research-grid,
             .local-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .scene-card.primary {
+                grid-column: span 1;
             }
 
             .flow {
@@ -646,6 +702,10 @@
             .output-row {
                 grid-template-columns: 1fr;
             }
+
+            .research-preview {
+                height: 460px;
+            }
         }
     </style>
 </head>
@@ -658,7 +718,8 @@
         <div class="nav-links">
             <a href="#workflow">工作流</a>
             <a href="#skills">Skill 接口</a>
-            <a href="#outputs">产物展示</a>
+            <a href="#outputs">操作台</a>
+            <a href="#gallery">场景展示</a>
             <a href="https://github.com/hhzz-svg/ai-workbench" target="_blank" rel="noreferrer">GitHub</a>
         </div>
     </nav>
@@ -827,23 +888,85 @@
             </div>
         </section>
 
-        <section class="section soft">
+        <section class="section soft" id="gallery">
             <div class="container">
-                <div class="poster-section">
-                    <div class="poster-copy">
-                        <p class="section-kicker">真实产物</p>
-                        <h2>海报、演示和文稿都能成为可交付文件。</h2>
-                        <p>下面的学术海报来自项目实际生成结果，用来展示工作台不只管理任务，也能沉淀可展示、可打印、可继续修改的专业产物。</p>
-                        <ul class="poster-points">
-                            <li>适合论文汇报、组会展示和会议海报场景。</li>
-                            <li>产物路径和下载入口由工作台统一索引。</li>
-                            <li>生成结果可以作为下一轮 AI 修改的输入。</li>
-                        </ul>
+                <div class="section-header">
+                    <div>
+                        <p class="section-kicker">多场景产物</p>
+                        <h2>同一个工作台，可以覆盖完全不同的海报场景。</h2>
                     </div>
-                    <figure class="poster-frame">
-                        <img src="assets/academic-poster.jpg" alt="由 AI Workbench 生成的学术海报示例。">
-                    </figure>
+                    <p>视觉海报看构图和提示词，英文海报看研究表达，学术海报看信息密度和图表组织。展示页现在把这些场景拆开呈现。</p>
                 </div>
+                <div class="scene-gallery" aria-label="视觉设计海报示例">
+                    <article class="scene-card primary">
+                        <div class="scene-image">
+                            <img src="assets/mondo-sapiens.jpg" alt="Mondo 风格人类简史横版海报示例。">
+                        </div>
+                        <div class="scene-body">
+                            <h3>公众号封面 / 书籍主题海报</h3>
+                            <p>适合把书籍、课程或专题内容转成横版封面，强调叙事时间线和主视觉。</p>
+                            <div class="prompt">
+                                <strong>提示词</strong>
+                                为《人类简史》设计公众号封面。
+                            </div>
+                        </div>
+                    </article>
+                    <article class="scene-card">
+                        <div class="scene-image">
+                            <img src="assets/mondo-interstellar.jpg" alt="Mondo 风格星际穿越横版海报示例。">
+                        </div>
+                        <div class="scene-body">
+                            <h3>电影感视觉海报</h3>
+                            <p>适合活动主视觉、影片解读、主题演讲或社媒横版宣传图。</p>
+                            <div class="prompt">
+                                <strong>提示词</strong>
+                                为《星际穿越》设计公众号封面。
+                            </div>
+                        </div>
+                    </article>
+                    <article class="scene-card">
+                        <div class="scene-image tall">
+                            <img src="assets/mondo-mood.jpg" alt="Mondo 风格花样年华小红书竖版海报示例。">
+                        </div>
+                        <div class="scene-body">
+                            <h3>竖版社媒海报</h3>
+                            <p>适合小红书、活动预热和专辑/影像类竖版封面。</p>
+                            <div class="prompt">
+                                <strong>提示词</strong>
+                                为《花样年华》设计小红书封面。
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="research-grid" aria-label="英文海报和学术海报示例">
+                    <article class="research-card">
+                        <div class="research-preview">
+                            <img src="assets/english-pda-poster.jpg" alt="College Students' Attitudes and Motivations Regarding Public Displays of Affection 英文研究海报。">
+                        </div>
+                        <div class="research-body">
+                            <h3>英文研究海报</h3>
+                            <p>从英文主题、问卷方法、结果讨论和参考文献出发，生成适合课程展示的研究型海报。</p>
+                            <div class="prompt">
+                                <strong>输入说明</strong>
+                                College Students' Attitudes and Motivations Regarding Public Displays of Affection。
+                            </div>
+                        </div>
+                    </article>
+                    <article class="research-card">
+                        <div class="research-preview">
+                            <img src="assets/academic-sensor-poster.jpg" alt="All-silicon pressure sensor 学术工程海报。">
+                        </div>
+                        <div class="research-body">
+                            <h3>工程学术海报</h3>
+                            <p>适合信息密度高的论文海报：摘要、理论、工艺、测试平台和结果图表集中排布。</p>
+                            <div class="prompt">
+                                <strong>输入说明</strong>
+                                A 1200-atmosphere bulk-type all-silicon pressure sensor 学术海报。
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <p class="source-note">视觉海报示例参考：joeseesun/qiaomu-mondo-poster-design。</p>
             </div>
         </section>
 
