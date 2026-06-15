@@ -3,432 +3,891 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Workbench - 本地 AI 创作工具</title>
-    <meta name="description" content="本地 AI 创作工作台 - 统一调用 PPT、论文、海报、网页演示等创作 Skill 接口">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>AI Workbench - 本地 AI 创作工作台</title>
+    <meta name="description" content="AI Workbench 是一个本地运行的 AI 创作工作台，统一调用 PPT、论文润色、学术海报、视觉海报和网页演示等 Skill 接口。">
+    <link rel="preload" href="assets/workbench-console-wide.png" as="image">
+    <link rel="preload" href="assets/academic-poster.jpg" as="image">
     <style>
+        :root {
+            --ink: #15211f;
+            --muted: #5d6b67;
+            --line: #dbe3e0;
+            --soft: #f4f7f6;
+            --paper: #ffffff;
+            --teal: #0f6b5e;
+            --teal-dark: #0b4f46;
+            --blue: #275f91;
+            --coral: #b84c43;
+            --amber: #aa6a18;
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--ink);
+            background: var(--paper);
             line-height: 1.6;
-            color: #1a1a1a;
-            background: #ffffff;
             overflow-x: hidden;
         }
 
-        /* Hero Section */
-        .hero {
-            min-height: 100vh;
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        img,
+        video {
+            max-width: 100%;
+            display: block;
+        }
+
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 20;
             display: flex;
             align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            justify-content: space-between;
+            gap: 24px;
+            padding: 16px 40px;
+            color: #ffffff;
+            background: linear-gradient(180deg, rgba(8, 22, 19, 0.78), rgba(8, 22, 19, 0));
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+        }
+
+        .brand-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            background: #ffffff;
+            color: var(--teal-dark);
+            font-weight: 900;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+        }
+
+        .hero {
             position: relative;
+            min-height: 86vh;
+            display: flex;
+            align-items: center;
             overflow: hidden;
+            color: #ffffff;
+            background: #081613;
         }
 
-        .hero::before {
-            content: '';
+        .hero-video {
             position: absolute;
-            width: 150%;
-            height: 150%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: drift 20s linear infinite;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.52;
         }
 
-        @keyframes drift {
-            from { transform: translate(-50px, -50px); }
-            to { transform: translate(0, 0); }
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, rgba(6, 17, 15, 0.92), rgba(6, 17, 15, 0.7) 42%, rgba(6, 17, 15, 0.18)),
+                linear-gradient(180deg, rgba(6, 17, 15, 0.16), rgba(6, 17, 15, 0.58));
         }
 
-        .hero-content {
-            text-align: center;
-            color: white;
+        .hero-inner {
             position: relative;
-            z-index: 1;
-            padding: 40px 20px;
-            max-width: 900px;
+            z-index: 2;
+            width: min(1180px, calc(100% - 48px));
+            margin: 0 auto;
+            padding-top: 76px;
         }
 
-        .logo {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            min-height: 30px;
+            padding: 4px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
+            color: rgba(255, 255, 255, 0.86);
+            font-size: 13px;
+            font-weight: 800;
+            background: rgba(255, 255, 255, 0.08);
         }
 
         h1 {
-            font-size: 56px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-
-        .tagline {
-            font-size: 24px;
-            margin-bottom: 40px;
-            opacity: 0.95;
-            font-weight: 400;
-        }
-
-        .notice {
-            margin: 0 auto 28px;
             max-width: 760px;
-            padding: 16px 22px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.16);
-            border: 1px solid rgba(255,255,255,0.34);
-            color: rgba(255,255,255,0.96);
-            font-size: 16px;
-            backdrop-filter: blur(10px);
+            margin: 24px 0 20px;
+            font-size: 64px;
+            line-height: 1.05;
+            letter-spacing: 0;
         }
 
-        .notice strong {
-            color: white;
+        .hero-copy {
+            max-width: 680px;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.86);
+            font-size: 20px;
+            line-height: 1.7;
         }
 
-        .cta-buttons {
+        .hero-actions {
             display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 40px;
             flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 34px;
         }
 
-        .btn {
-            padding: 18px 40px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 18px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .button {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            min-height: 46px;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 850;
+            border: 1px solid transparent;
         }
 
-        .btn-primary {
-            background: white;
-            color: #667eea;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        .button.primary {
+            background: #ffffff;
+            color: var(--teal-dark);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        .button.secondary {
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.36);
+            background: rgba(255, 255, 255, 0.08);
         }
 
-        .btn-secondary {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.5);
-            backdrop-filter: blur(10px);
+        .hero-proof {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 54px;
+            max-width: 880px;
         }
 
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.3);
-            border-color: white;
-            transform: translateY(-3px);
+        .proof-item {
+            min-width: 150px;
+            padding-right: 18px;
+            border-right: 1px solid rgba(255, 255, 255, 0.22);
         }
 
-        /* Features Section */
-        .features {
-            padding: 100px 20px;
-            background: #f8f9fa;
+        .proof-item:last-child {
+            border-right: 0;
+        }
+
+        .proof-item strong {
+            display: block;
+            font-size: 24px;
+            line-height: 1.2;
+        }
+
+        .proof-item span {
+            display: block;
+            margin-top: 4px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 13px;
+        }
+
+        .notice-band {
+            background: #eaf3f1;
+            border-bottom: 1px solid #d6e5e1;
         }
 
         .container {
-            max-width: 1200px;
+            width: min(1180px, calc(100% - 48px));
             margin: 0 auto;
         }
 
-        .section-title {
-            text-align: center;
-            font-size: 42px;
-            font-weight: 800;
-            margin-bottom: 60px;
-            color: #1a1a1a;
+        .notice-band .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 18px 0;
+            color: #29433e;
+            font-size: 14px;
         }
 
-        .feature-grid {
+        .notice-band strong {
+            color: var(--teal-dark);
+        }
+
+        .section {
+            padding: 92px 0;
+        }
+
+        .section.soft {
+            background: var(--soft);
+        }
+
+        .section-header {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: minmax(0, 0.92fr) minmax(280px, 0.58fr);
+            gap: 56px;
+            align-items: end;
+            margin-bottom: 42px;
         }
 
-        .feature-card {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-            border: 1px solid #e5e7eb;
+        .section-kicker {
+            margin: 0 0 10px;
+            color: var(--teal);
+            font-size: 13px;
+            font-weight: 850;
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        h2 {
+            margin: 0;
+            font-size: 42px;
+            line-height: 1.16;
+            letter-spacing: 0;
         }
 
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-        }
-
-        .feature-card h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .feature-card p {
-            color: #6b7280;
+        .section-header p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 16px;
             line-height: 1.7;
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--paper);
+        }
+
+        .flow-step {
+            min-height: 210px;
+            padding: 26px;
+            border-right: 1px solid var(--line);
+        }
+
+        .flow-step:last-child {
+            border-right: 0;
+        }
+
+        .flow-step b {
+            display: block;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            background: var(--teal);
+            font-size: 14px;
+        }
+
+        .flow-step h3 {
+            margin: 22px 0 10px;
+            font-size: 19px;
+            line-height: 1.35;
+        }
+
+        .flow-step p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .skill-board {
+            border-top: 1px solid var(--line);
+            background: var(--paper);
+        }
+
+        .skill-row {
+            display: grid;
+            grid-template-columns: minmax(190px, 0.42fr) minmax(280px, 0.72fr) minmax(280px, 0.72fr);
+            gap: 24px;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .skill-name {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .skill-name strong {
+            font-size: 18px;
+        }
+
+        .skill-name span,
+        .skill-row p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .skill-row p {
+            line-height: 1.65;
+        }
+
+        .visual-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.72fr);
+            gap: 28px;
+            align-items: start;
+        }
+
+        .figure-panel {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--paper);
+            overflow: hidden;
+        }
+
+        .figure-panel img {
+            width: 100%;
+            height: auto;
+        }
+
+        .figure-caption {
+            padding: 16px 18px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .figure-caption strong {
+            color: var(--ink);
+            font-size: 14px;
+        }
+
+        .output-stack {
+            display: grid;
+            gap: 12px;
+        }
+
+        .output-row {
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            gap: 16px;
+            align-items: center;
+            min-height: 82px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--paper);
+        }
+
+        .output-row strong {
+            color: var(--teal-dark);
+            font-size: 15px;
+        }
+
+        .output-row span {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .poster-section {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.78fr) minmax(0, 1fr);
+            gap: 48px;
+            align-items: center;
+        }
+
+        .poster-copy h2 {
+            margin-bottom: 18px;
+        }
+
+        .poster-copy p {
+            margin: 0 0 26px;
+            color: var(--muted);
             font-size: 16px;
         }
 
-        /* Highlights Section */
-        .highlights {
-            padding: 100px 20px;
-            background: white;
-        }
-
-        .highlight-grid {
+        .poster-points {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-top: 60px;
+            gap: 14px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
         }
 
-        .highlight-item {
+        .poster-points li {
+            padding-left: 18px;
+            border-left: 3px solid var(--teal);
+            color: #314541;
+            font-weight: 700;
+        }
+
+        .poster-frame {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 24px 70px rgba(21, 33, 31, 0.13);
+        }
+
+        .poster-frame img {
+            width: 100%;
+        }
+
+        .local-band {
+            background: #101b18;
+            color: #ffffff;
+        }
+
+        .local-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 0.85fr) repeat(3, minmax(150px, 0.38fr));
+            gap: 28px;
+            align-items: start;
+        }
+
+        .local-grid h2 {
+            margin-bottom: 16px;
+        }
+
+        .local-grid p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .local-stat {
+            border-left: 1px solid rgba(255, 255, 255, 0.18);
+            padding-left: 18px;
+        }
+
+        .local-stat strong {
+            display: block;
+            font-size: 30px;
+            color: #ffffff;
+        }
+
+        .local-stat span {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+        }
+
+        .cta {
             text-align: center;
+            background: #f9fbfa;
         }
 
-        .highlight-number {
-            font-size: 48px;
-            font-weight: 800;
-            color: #667eea;
-            margin-bottom: 10px;
+        .cta h2 {
+            max-width: 760px;
+            margin: 0 auto 18px;
         }
 
-        .highlight-text {
-            font-size: 18px;
-            color: #6b7280;
+        .cta p {
+            max-width: 680px;
+            margin: 0 auto 28px;
+            color: var(--muted);
         }
 
-        /* Tech Stack */
-        .tech-stack {
-            padding: 100px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .tech-grid {
-            display: flex;
+        .cta .hero-actions {
             justify-content: center;
+            margin-top: 0;
+        }
+
+        .cta .button.primary {
+            color: #ffffff;
+            background: var(--teal-dark);
+        }
+
+        .cta .button.secondary {
+            color: var(--teal-dark);
+            border-color: #bdd4cf;
+            background: #ffffff;
+        }
+
+        footer {
+            padding: 30px 0;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 13px;
+            background: #ffffff;
+        }
+
+        footer .container {
+            display: flex;
+            justify-content: space-between;
             gap: 20px;
             flex-wrap: wrap;
-            margin-top: 40px;
-        }
-
-        .tech-badge {
-            background: rgba(255,255,255,0.2);
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 16px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 100px 20px;
-            background: #1a1a1a;
-            color: white;
-            text-align: center;
-        }
-
-        .cta-section h2 {
-            font-size: 42px;
-            font-weight: 800;
-            margin-bottom: 30px;
-        }
-
-        .cta-section p {
-            font-size: 20px;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-
-        /* Footer */
-        footer {
-            background: #111;
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
         }
 
         .footer-links {
             display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 20px;
+            gap: 18px;
             flex-wrap: wrap;
         }
 
-        .footer-links a {
-            color: rgba(255,255,255,0.7);
-            text-decoration: none;
-            transition: color 0.3s;
+        @media (max-width: 960px) {
+            .top-nav {
+                padding: 14px 22px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero-inner,
+            .container {
+                width: min(100% - 32px, 1180px);
+            }
+
+            h1 {
+                font-size: 44px;
+            }
+
+            .hero-copy {
+                font-size: 17px;
+            }
+
+            .section-header,
+            .visual-grid,
+            .poster-section,
+            .local-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flow {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .flow-step:nth-child(2) {
+                border-right: 0;
+            }
+
+            .flow-step:nth-child(1),
+            .flow-step:nth-child(2) {
+                border-bottom: 1px solid var(--line);
+            }
+
+            .skill-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
         }
 
-        .footer-links a:hover {
-            color: white;
-        }
+        @media (max-width: 640px) {
+            .hero {
+                min-height: 88vh;
+            }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            h1 { font-size: 36px; }
-            .tagline { font-size: 18px; }
-            .section-title { font-size: 32px; }
-            .logo { font-size: 60px; }
+            .top-nav {
+                position: absolute;
+            }
+
+            h1 {
+                font-size: 34px;
+            }
+
+            h2 {
+                font-size: 30px;
+            }
+
+            .section {
+                padding: 66px 0;
+            }
+
+            .flow {
+                grid-template-columns: 1fr;
+            }
+
+            .flow-step,
+            .flow-step:nth-child(2) {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .flow-step:last-child {
+                border-bottom: 0;
+            }
+
+            .notice-band .container,
+            .figure-caption,
+            footer .container {
+                display: grid;
+            }
+
+            .output-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="logo">🎨</div>
-            <h1>AI Workbench</h1>
-            <p class="tagline">本地 AI 创作工作台<br>统一调用 PPT、论文、海报、网页演示等创作 Skill 接口</p>
-            <p class="notice"><strong>当前页面是项目展示页。</strong>完整工作台需要下载到本地运行，模型配置、上传资料和生成结果都保存在自己的电脑上。</p>
-            <div class="cta-buttons">
-                <a href="https://github.com/hhzz-svg/ai-workbench" class="btn btn-primary" target="_blank">
-                    ⭐ 查看源码
-                </a>
-                <a href="https://github.com/hhzz-svg/ai-workbench/releases" class="btn btn-secondary" target="_blank">
-                    📥 下载使用
-                </a>
+    <nav class="top-nav" aria-label="主导航">
+        <a class="brand" href="#top" aria-label="AI Workbench 首页">
+            <span class="brand-mark">AI</span>
+            <span>AI Workbench</span>
+        </a>
+        <div class="nav-links">
+            <a href="#workflow">工作流</a>
+            <a href="#skills">Skill 接口</a>
+            <a href="#outputs">产物展示</a>
+            <a href="https://github.com/hhzz-svg/ai-workbench" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+    </nav>
+
+    <header class="hero" id="top">
+        <video class="hero-video" autoplay muted loop playsinline poster="assets/workbench-console-wide.png">
+            <source src="assets/workbench-demo.mp4" type="video/mp4">
+        </video>
+        <div class="hero-inner">
+            <span class="eyebrow">本地运行的 AI 创作控制台</span>
+            <h1>一个工作台，统一调用论文、PPT、海报和网页演示 Skill。</h1>
+            <p class="hero-copy">AI Workbench 把分散的创作类 Skill 接口收进同一个本地工作流：上传资料、选择创作方向、队列生成、下载产物、继续二次处理。</p>
+            <div class="hero-actions">
+                <a class="button primary" href="https://github.com/hhzz-svg/ai-workbench" target="_blank" rel="noreferrer">查看源码</a>
+                <a class="button secondary" href="https://github.com/hhzz-svg/ai-workbench/releases" target="_blank" rel="noreferrer">下载本地运行</a>
+            </div>
+            <div class="hero-proof" aria-label="项目亮点">
+                <div class="proof-item">
+                    <strong>5 类</strong>
+                    <span>核心创作 Skill</span>
+                </div>
+                <div class="proof-item">
+                    <strong>PPTX / PDF / HTML</strong>
+                    <span>统一产物管理</span>
+                </div>
+                <div class="proof-item">
+                    <strong>本机</strong>
+                    <span>资料、密钥和结果留在电脑上</span>
+                </div>
             </div>
         </div>
-    </section>
+    </header>
 
-    <!-- Features Section -->
-    <section class="features">
+    <section class="notice-band" aria-label="使用说明">
         <div class="container">
-            <h2 class="section-title">✨ 核心亮点</h2>
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🧩</div>
-                    <h3>多 Skill 接口集成</h3>
-                    <p>把 PPT、论文润色、网页演示、学术海报、视觉海报等创作 Skill 包装成统一入口</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>PPT 与论文 Skill</h3>
-                    <p>调用 nature-paper2ppt 和 nature-polishing，把论文、实验图和章节草稿转成演示或润色稿</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🖼️</div>
-                    <h3>海报 Skill</h3>
-                    <p>集成学术海报和视觉海报能力，支持会议海报、品牌海报、封面和图片提示词产物</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>网页演示 Skill</h3>
-                    <p>调用 guizang-ppt-skill，把主题素材整理成可浏览、可分享的横向翻页 HTML 演示</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📦</div>
-                    <h3>统一任务与产物</h3>
-                    <p>不同 Skill 生成的 PPTX、Markdown、HTML、PDF 和图片都会进入同一个任务看板管理</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔄</div>
-                    <h3>AI 二次处理</h3>
-                    <p>对已生成产物继续添加修改要求，基于原文件创建新的再加工任务</p>
-                </div>
-            </div>
+            <span><strong>当前页面是项目展示页。</strong>完整工作台需要下载到本地运行，不是在线 SaaS。</span>
+            <span>展示网址：ai-workbench-cvs.pages.dev</span>
         </div>
     </section>
 
-    <!-- Highlights -->
-    <section class="highlights">
-        <div class="container">
-            <h2 class="section-title">🚀 为什么选择 AI Workbench</h2>
-            <div class="highlight-grid">
-                <div class="highlight-item">
-                    <div class="highlight-number">🔒</div>
-                    <div class="highlight-text">本地运行<br>数据隐私安全</div>
+    <main>
+        <section class="section" id="workflow">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <p class="section-kicker">工作流</p>
+                        <h2>把“调用 Skill”变成一条清楚的生产线。</h2>
+                    </div>
+                    <p>这个项目的价值不只是做一个表单，而是把多种专业创作 Skill 接口统一成一个可操作、可追踪、可复用的本地创作流程。</p>
                 </div>
-                <div class="highlight-item">
-                    <div class="highlight-number">5</div>
-                    <div class="highlight-text">已集成<br>核心 Skill</div>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-number">🎨</div>
-                    <div class="highlight-text">精美设计<br>专业输出</div>
-                </div>
-                <div class="highlight-item">
-                    <div class="highlight-number">🆓</div>
-                    <div class="highlight-text">完全开源<br>MIT 许可</div>
+                <div class="flow" aria-label="AI Workbench 工作流">
+                    <article class="flow-step">
+                        <b>01</b>
+                        <h3>选择创作方向</h3>
+                        <p>从论文演示、学术润色、网页演示、学术海报、视觉海报中快速开始。</p>
+                    </article>
+                    <article class="flow-step">
+                        <b>02</b>
+                        <h3>上传资料和要求</h3>
+                        <p>论文、实验图、章节草稿、主题素材和参考风格都可以进入同一个任务。</p>
+                    </article>
+                    <article class="flow-step">
+                        <b>03</b>
+                        <h3>本地队列执行</h3>
+                        <p>任务状态、运行记录和异常信息集中显示，避免在多个脚本窗口里来回找结果。</p>
+                    </article>
+                    <article class="flow-step">
+                        <b>04</b>
+                        <h3>产物继续加工</h3>
+                        <p>生成后的 PPT、PDF、HTML、图片和 Markdown 可以下载，也可以继续追加 AI 修改要求。</p>
+                    </article>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Tech Stack -->
-    <section class="tech-stack">
-        <div class="container">
-            <h2 class="section-title">🛠️ 技术栈</h2>
-            <div class="tech-grid">
-                <div class="tech-badge">React 18</div>
-                <div class="tech-badge">TypeScript</div>
-                <div class="tech-badge">FastAPI</div>
-                <div class="tech-badge">Python 3.10+</div>
-                <div class="tech-badge">SQLite</div>
-                <div class="tech-badge">Vite</div>
+        <section class="section soft" id="outputs">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <p class="section-kicker">操作台预览</p>
+                        <h2>真实工作台界面，而不是只写概念。</h2>
+                    </div>
+                    <p>截图来自本地运行的 React 工作台：左侧创建任务，右侧任务看板，底部显示运行记录和生成产物。</p>
+                </div>
+                <div class="visual-grid">
+                    <figure class="figure-panel">
+                        <img src="assets/workbench-console-wide.png" alt="AI Workbench 本地创作工作台截图，论文演示模板已选中。">
+                        <figcaption class="figure-caption">
+                            <strong>创作工作台</strong>
+                            <span>统一入口、快速模板、任务看板</span>
+                        </figcaption>
+                    </figure>
+                    <div class="output-stack" aria-label="统一产物类型">
+                        <div class="output-row">
+                            <strong>PPTX</strong>
+                            <span>论文、实验图和笔记生成中文学术演示。</span>
+                        </div>
+                        <div class="output-row">
+                            <strong>Markdown</strong>
+                            <span>学术润色稿、修改说明和检查报告可继续编辑。</span>
+                        </div>
+                        <div class="output-row">
+                            <strong>HTML</strong>
+                            <span>主题素材生成可浏览、可分享的网页演示。</span>
+                        </div>
+                        <div class="output-row">
+                            <strong>PDF / Image</strong>
+                            <span>学术海报、视觉海报和打印文件进入统一产物区。</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <h2>准备好开始了吗？</h2>
-            <p>免费开源，5 分钟即可上手使用</p>
-            <div class="cta-buttons">
-                <a href="https://github.com/hhzz-svg/ai-workbench" class="btn btn-primary" target="_blank">
-                    ⭐ Star on GitHub
-                </a>
-                <a href="https://github.com/hhzz-svg/ai-workbench/releases" class="btn btn-secondary" target="_blank">
-                    📥 下载使用
-                </a>
+        <section class="section" id="skills">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <p class="section-kicker">Skill 接口</p>
+                        <h2>项目亮点是集成，不是单点生成。</h2>
+                    </div>
+                    <p>AI Workbench 把多个专业 Skill 的输入、执行和产物收敛到同一个产品界面里，适合持续扩展更多创作能力。</p>
+                </div>
+                <div class="skill-board" aria-label="已集成 Skill 接口">
+                    <div class="skill-row">
+                        <div class="skill-name">
+                            <strong>nature-paper2ppt</strong>
+                            <span>论文演示</span>
+                        </div>
+                        <p>输入论文 PDF、实验图、阅读笔记或章节材料。</p>
+                        <p>输出中文学术 PPTX、检查报告和图像资源清单。</p>
+                    </div>
+                    <div class="skill-row">
+                        <div class="skill-name">
+                            <strong>nature-polishing</strong>
+                            <span>学术润色</span>
+                        </div>
+                        <p>输入摘要、章节、回复信或论文段落。</p>
+                        <p>输出润色稿、修改说明和可追踪的文本版本。</p>
+                    </div>
+                    <div class="skill-row">
+                        <div class="skill-name">
+                            <strong>make-poster</strong>
+                            <span>学术海报</span>
+                        </div>
+                        <p>输入论文材料、图表、格式说明和参考风格。</p>
+                        <p>输出会议海报 HTML、PDF 和海报配置文件。</p>
+                    </div>
+                    <div class="skill-row">
+                        <div class="skill-name">
+                            <strong>guizang-ppt-skill</strong>
+                            <span>网页演示</span>
+                        </div>
+                        <p>输入主题、受众、时长、素材和图片。</p>
+                        <p>输出横向翻页的网页 PPT 和配套图片资源。</p>
+                    </div>
+                    <div class="skill-row">
+                        <div class="skill-name">
+                            <strong>mondo-poster-design</strong>
+                            <span>视觉海报</span>
+                        </div>
+                        <p>输入主题、比例、风格偏好和参考图。</p>
+                        <p>输出英文海报方案、图片提示词和视觉产物。</p>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Footer -->
+        <section class="section soft">
+            <div class="container">
+                <div class="poster-section">
+                    <div class="poster-copy">
+                        <p class="section-kicker">真实产物</p>
+                        <h2>海报、演示和文稿都能成为可交付文件。</h2>
+                        <p>下面的学术海报来自项目实际生成结果，用来展示工作台不只管理任务，也能沉淀可展示、可打印、可继续修改的专业产物。</p>
+                        <ul class="poster-points">
+                            <li>适合论文汇报、组会展示和会议海报场景。</li>
+                            <li>产物路径和下载入口由工作台统一索引。</li>
+                            <li>生成结果可以作为下一轮 AI 修改的输入。</li>
+                        </ul>
+                    </div>
+                    <figure class="poster-frame">
+                        <img src="assets/academic-poster.jpg" alt="由 AI Workbench 生成的学术海报示例。">
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+        <section class="section local-band">
+            <div class="container local-grid">
+                <div>
+                    <h2>本地优先，适合放进自己的创作流程。</h2>
+                    <p>工作台不是把文件上传到一个陌生的在线服务。它在你的电脑上运行，模型配置、上传材料和生成结果都由本地项目管理。</p>
+                </div>
+                <div class="local-stat">
+                    <strong>Local</strong>
+                    <span>密钥与资料留在本机</span>
+                </div>
+                <div class="local-stat">
+                    <strong>Queue</strong>
+                    <span>任务状态集中追踪</span>
+                </div>
+                <div class="local-stat">
+                    <strong>Open</strong>
+                    <span>MIT 许可，便于继续扩展</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section cta">
+            <div class="container">
+                <h2>想要的是一个可扩展的 AI 创作工作台，而不是一次性的生成脚本。</h2>
+                <p>现在可以先本地运行体验，再继续接入更多 Skill、更多产物预览和更完整的分享流程。</p>
+                <div class="hero-actions">
+                    <a class="button primary" href="https://github.com/hhzz-svg/ai-workbench" target="_blank" rel="noreferrer">进入 GitHub</a>
+                    <a class="button secondary" href="https://github.com/hhzz-svg/ai-workbench/blob/main/README.md" target="_blank" rel="noreferrer">查看使用说明</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
     <footer>
-        <p>&copy; 2026 AI Workbench | MIT License</p>
-        <div class="footer-links">
-            <a href="https://github.com/hhzz-svg/ai-workbench" target="_blank">GitHub</a>
-            <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/README.md" target="_blank">文档</a>
-            <a href="https://github.com/hhzz-svg/ai-workbench/issues" target="_blank">问题反馈</a>
-            <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/CONTRIBUTING.md" target="_blank">贡献指南</a>
+        <div class="container">
+            <span>© 2026 AI Workbench · MIT License</span>
+            <div class="footer-links">
+                <a href="https://github.com/hhzz-svg/ai-workbench" target="_blank" rel="noreferrer">GitHub</a>
+                <a href="https://github.com/hhzz-svg/ai-workbench/issues" target="_blank" rel="noreferrer">问题反馈</a>
+                <a href="https://github.com/hhzz-svg/ai-workbench/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer">贡献指南</a>
+            </div>
         </div>
     </footer>
 </body>
