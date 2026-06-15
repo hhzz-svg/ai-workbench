@@ -57,3 +57,21 @@
 - `landing-page/assets/mondo-prince.jpg` - Added optimized 小王子 Mondo example image from the referenced GitHub repository.
 - `progress.md` - Added this task record because the repository files were modified.
 - Rollback: revert this commit or remove `landing-page/assets/mondo-prince.jpg` and restore the previous gallery CSS/content in `landing-page/index.html`.
+
+## 2026-06-15 - Task: Replace English poster showcase with BMW case poster
+### What was done
+- Replaced the English PDA research poster showcase with the provided BMW 7-Series Project English case poster.
+- Updated the scenario title, description, image alt text, and input prompt to match the BMW business case poster.
+- Removed the old PDA poster asset from the landing page assets.
+
+### Testing
+- Optimized the provided BMW poster image into `landing-page/assets/english-bmw-poster.jpg`.
+- Checked that the landing page references the BMW poster and prompt, and no longer references the old PDA poster text or asset.
+- Served `landing-page` through a temporary local HTTP server and verified in Chrome that the BMW poster loads, the old PDA reference is absent, and the page has no horizontal overflow.
+
+### Notes
+- `landing-page/index.html` - Updated the English poster showcase copy and image reference from the PDA research poster to the BMW 7-Series business case poster.
+- `landing-page/assets/english-bmw-poster.jpg` - Added the optimized BMW poster image from the provided source file.
+- `landing-page/assets/english-pda-poster.jpg` - Removed the previous English PDA poster image.
+- `progress.md` - Added this task record because the repository files were modified.
+- Rollback: revert this commit or restore `landing-page/index.html`, remove `landing-page/assets/english-bmw-poster.jpg`, and restore `landing-page/assets/english-pda-poster.jpg` from the previous commit.
