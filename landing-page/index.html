@@ -422,8 +422,9 @@
 
         .scene-gallery {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 18px;
+            align-items: stretch;
         }
 
         .scene-card,
@@ -432,20 +433,18 @@
             border-radius: 8px;
             overflow: hidden;
             background: var(--paper);
-        }
-
-        .scene-card.primary {
-            grid-column: span 2;
+            display: flex;
+            flex-direction: column;
         }
 
         .scene-image {
-            aspect-ratio: 16 / 9;
+            aspect-ratio: 21 / 9;
             background: #eef2f1;
             overflow: hidden;
         }
 
         .scene-image.tall {
-            aspect-ratio: 4 / 5;
+            aspect-ratio: 3 / 4;
         }
 
         .scene-image img {
@@ -457,6 +456,9 @@
         .scene-body,
         .research-body {
             padding: 18px;
+            display: flex;
+            flex: 1;
+            flex-direction: column;
         }
 
         .scene-body h3,
@@ -475,6 +477,7 @@
         }
 
         .prompt {
+            flex: 1;
             margin-top: 14px;
             padding: 12px;
             border-radius: 8px;
@@ -489,6 +492,13 @@
             margin-bottom: 4px;
             color: var(--teal-dark);
             font-size: 12px;
+        }
+
+        .prompt em {
+            display: block;
+            margin-top: 8px;
+            color: var(--muted);
+            font-style: normal;
         }
 
         .research-grid {
@@ -633,10 +643,6 @@
             .research-grid,
             .local-grid {
                 grid-template-columns: 1fr;
-            }
-
-            .scene-card.primary {
-                grid-column: span 1;
             }
 
             .flow {
@@ -898,16 +904,17 @@
                     <p>视觉海报看构图和提示词，英文海报看研究表达，学术海报看信息密度和图表组织。展示页现在把这些场景拆开呈现。</p>
                 </div>
                 <div class="scene-gallery" aria-label="视觉设计海报示例">
-                    <article class="scene-card primary">
+                    <article class="scene-card">
                         <div class="scene-image">
                             <img src="assets/mondo-sapiens.jpg" alt="Mondo 风格人类简史横版海报示例。">
                         </div>
                         <div class="scene-body">
-                            <h3>公众号封面 / 书籍主题海报</h3>
-                            <p>适合把书籍、课程或专题内容转成横版封面，强调叙事时间线和主视觉。</p>
+                            <h3>公众号封面（21:9 超宽横版）</h3>
+                            <p>文艺风公众号封面，适合把书籍或专题内容转成横版头图。</p>
                             <div class="prompt">
                                 <strong>提示词</strong>
-                                为《人类简史》设计公众号封面。
+                                "为《人类简史》设计公众号封面"
+                                <em>AI选择了文艺风：柔和水彩质感、人类进化全景时间线</em>
                             </div>
                         </div>
                     </article>
@@ -916,11 +923,12 @@
                             <img src="assets/mondo-interstellar.jpg" alt="Mondo 风格星际穿越横版海报示例。">
                         </div>
                         <div class="scene-body">
-                            <h3>电影感视觉海报</h3>
-                            <p>适合活动主视觉、影片解读、主题演讲或社媒横版宣传图。</p>
+                            <h3>公众号封面（科幻影评）</h3>
+                            <p>Kilian Eng 科幻风封面，适合电影解读、主题演讲或横版宣传图。</p>
                             <div class="prompt">
                                 <strong>提示词</strong>
-                                为《星际穿越》设计公众号封面。
+                                "为《星际穿越》影评设计公众号封面"
+                                <em>AI选择了 Kilian Eng 几何未来主义：黑洞+飞船+宇宙深空</em>
                             </div>
                         </div>
                     </article>
@@ -929,11 +937,26 @@
                             <img src="assets/mondo-mood.jpg" alt="Mondo 风格花样年华小红书竖版海报示例。">
                         </div>
                         <div class="scene-body">
-                            <h3>竖版社媒海报</h3>
-                            <p>适合小红书、活动预热和专辑/影像类竖版封面。</p>
+                            <h3>小红书配图（3:4 竖版）</h3>
+                            <p>日系风小红书观影笔记，适合影像类竖版封面和生活美学内容。</p>
                             <div class="prompt">
                                 <strong>提示词</strong>
-                                为《花样年华》设计小红书封面。
+                                "为《花样年华》设计观影笔记配图"
+                                <em>AI选择了日系风格：温暖胶片感、旗袍女人雨巷剪影</em>
+                            </div>
+                        </div>
+                    </article>
+                    <article class="scene-card">
+                        <div class="scene-image tall">
+                            <img src="assets/mondo-prince.jpg" alt="Mondo 风格小王子小红书竖版配图示例。">
+                        </div>
+                        <div class="scene-body">
+                            <h3>小红书配图（读书分享）</h3>
+                            <p>韩系风小红书读书分享，适合轻阅读、书摘和社交平台内容。</p>
+                            <div class="prompt">
+                                <strong>提示词</strong>
+                                "为《小王子》设计读书分享配图"
+                                <em>AI选择了韩系风格：梦幻粉紫渐变、小王子站在星球上</em>
                             </div>
                         </div>
                     </article>

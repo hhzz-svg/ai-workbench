@@ -40,3 +40,20 @@
 - `landing-page/assets/academic-poster.jpg` - Removed the previous single academic poster image because the showcase now uses the user-provided academic poster.
 - `progress.md` - Added this task record because the repository files were modified.
 - Rollback: revert this commit or restore `landing-page/index.html`, remove the five new gallery assets, and restore `landing-page/assets/academic-poster.jpg` from the previous commit.
+
+## 2026-06-15 - Task: Tighten showcase gallery layout and prompts
+### What was done
+- Reworked the Mondo poster gallery into a balanced 2x2 layout so the section no longer leaves an empty column.
+- Added the GitHub README's 小王子 example to fill the visual design gallery.
+- Updated the Mondo prompt text and style notes to match the source README wording.
+
+### Testing
+- Checked that all four Mondo prompt strings are present exactly as quoted in the source README examples.
+- Served `landing-page` through a temporary local HTTP server and verified in Chrome that the Mondo gallery renders as two equal columns, all images load, and the page has no horizontal overflow.
+- Confirmed the temporary local HTTP server and preview tab were closed after verification.
+
+### Notes
+- `landing-page/index.html` - Changed the visual poster gallery layout from uneven span-based cards to a 2x2 grid and updated prompt/style copy.
+- `landing-page/assets/mondo-prince.jpg` - Added optimized 小王子 Mondo example image from the referenced GitHub repository.
+- `progress.md` - Added this task record because the repository files were modified.
+- Rollback: revert this commit or remove `landing-page/assets/mondo-prince.jpg` and restore the previous gallery CSS/content in `landing-page/index.html`.
