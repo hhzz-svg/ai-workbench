@@ -73,3 +73,11 @@ def test_adapter_rejects_empty_prompt(tmp_path):
     adapter = get_adapter("nature-polishing")
     with pytest.raises(ValueError, match="prompt"):
         adapter.prepare("job_123", "   ", {}, [], tmp_path)
+
+
+def test_adapter_prompt_names_skill_without_template_marker(tmp_path):
+    adapter = get_adapter("nature-polishing")
+    context = adapter.prepare("job_123", "Polish this abstract.", {}, [], tmp_path)
+
+    assert "Use the nature-polishing skill" in context.prompt
+    assert "$nature-polishing" not in context.prompt

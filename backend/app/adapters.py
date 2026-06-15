@@ -113,7 +113,7 @@ def _artifact_from_path(path: Path) -> Artifact:
     )
 
 
-BASE_TEMPLATE = """Use the ${skill_type} skill for this job.
+BASE_TEMPLATE = """Use the {skill_type} skill for this job.
 
 Job ID: {job_id}
 Workspace: {workspace}
