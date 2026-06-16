@@ -1659,8 +1659,7 @@ button.metric:hover {
   flex-shrink: 0;
 }
 
-.dir-empty,
-.dir-error {
+.dir-empty {
   padding: var(--s4);
   text-align: center;
   font-size: 13px;
@@ -1668,7 +1667,25 @@ button.metric:hover {
 }
 
 .dir-error {
+  padding: var(--s4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s3);
+  text-align: center;
+}
+
+.dir-error p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--st-failed-fg);
+}
+
+.dir-error .secondary-button {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
 }
 
 /* 风格细化选项组 */

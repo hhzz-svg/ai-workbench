@@ -442,15 +442,25 @@ function DirectoryPicker({
   const [roots, setRoots] = useState<FilesystemRoot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastPath, setLastPath] = useState<string | undefined>(undefined);
+
+  const friendlyError = (raw: string) => {
+    const text = (raw || "").toLowerCase();
+    if (!raw || text.includes("bad gateway") || text.includes("502") || text.includes("failed to fetch") || text.includes("networkerror")) {
+      return "无法连接到本地服务。请确认后端已启动（运行 start.bat，或本地 8000 端口的服务在运行）后重试。";
+    }
+    return raw;
+  };
 
   const load = async (path?: string) => {
     setLoading(true);
     setError(null);
+    setLastPath(path);
     try {
       const result = await api.listDirectory(path);
       setListing(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "无法读取该文件夹");
+      setError(friendlyError(err instanceof Error ? err.message : ""));
     } finally {
       setLoading(false);
     }
@@ -481,17 +491,24 @@ function DirectoryPicker({
         )}
 
         <div className="dir-current" title={listing?.path}>
-          <span className="dir-current-path">{listing?.path ?? "加载中…"}</span>
+          <span className="dir-current-path">{listing?.path ?? (loading ? "读取中…" : "—")}</span>
         </div>
 
         <div className="dir-list">
-          {listing?.parent && (
+          {!loading && !error && listing?.parent && (
             <button type="button" className="dir-row up" onClick={() => load(listing.parent ?? undefined)}>
               <CornerLeftUp size={16} /> <span>上级目录</span>
             </button>
           )}
           {loading && <p className="dir-empty">读取中…</p>}
-          {error && <p className="dir-error">{error}</p>}
+          {error && (
+            <div className="dir-error">
+              <p>{error}</p>
+              <button type="button" className="secondary-button" onClick={() => load(lastPath)}>
+                <RefreshCcw size={15} /> 重试
+              </button>
+            </div>
+          )}
           {!loading && !error && listing && listing.entries.length === 0 && (
             <p className="dir-empty">该文件夹下没有子文件夹</p>
           )}
