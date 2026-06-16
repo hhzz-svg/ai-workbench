@@ -43,6 +43,58 @@ def cors_origins_from_env() -> list[str]:
     return list(dict.fromkeys([*DEFAULT_CORS_ORIGINS, *configured]))
 
 
+def list_filesystem_roots() -> list[dict[str, str]]:
+    """枚举可作为浏览起点的根：Windows 列盘符，其它平台列根目录。"""
+    roots: list[dict[str, str]] = []
+    if os.name == "nt":
+        for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+            drive = Path(f"{letter}:\\")
+            try:
+                if drive.exists():
+                    roots.append({"name": f"{letter}:\\", "path": str(drive)})
+            except OSError:
+                continue
+    else:
+        roots.append({"name": "/", "path": "/"})
+    home = Path.home()
+    if not any(r["path"] == str(home) for r in roots):
+        roots.append({"name": f"~ ({home.name})", "path": str(home)})
+    return roots
+
+
+def browse_directory(raw_path: str | None) -> dict[str, Any]:
+    """列出某个目录下的子目录；不传则从家目录开始。仅返回目录项。"""
+    target = Path(raw_path).expanduser() if raw_path and raw_path.strip() else Path.home()
+    if not target.is_absolute():
+        raise HTTPException(status_code=400, detail="路径必须是绝对路径")
+    if not target.exists():
+        raise HTTPException(status_code=400, detail="目录不存在")
+    if not target.is_dir():
+        raise HTTPException(status_code=400, detail="该路径不是文件夹")
+
+    entries: list[dict[str, Any]] = []
+    try:
+        for child in sorted(target.iterdir(), key=lambda p: p.name.lower()):
+            try:
+                if child.is_dir() and not child.name.startswith("."):
+                    entries.append({"name": child.name, "path": str(child), "is_dir": True})
+            except OSError:
+                continue
+    except PermissionError:
+        raise HTTPException(status_code=400, detail="没有权限访问该文件夹")
+    except OSError as exc:
+        raise HTTPException(status_code=400, detail=f"无法读取该文件夹：{type(exc).__name__}")
+
+    parent = target.parent
+    parent_str = str(parent) if parent != target else None
+    return {
+        "path": str(target),
+        "parent": parent_str,
+        "separator": os.sep,
+        "entries": entries,
+    }
+
+
 def create_app(data_dir: Path | None = None, start_worker: bool = True) -> FastAPI:
     root = data_dir or default_data_dir()
     root.mkdir(parents=True, exist_ok=True)
@@ -146,6 +198,14 @@ def create_app(data_dir: Path | None = None, start_worker: bool = True) -> FastA
                 handle.write(chunk)
         record = store.save_file(name=safe_name, path=str(path), size=size, content_type=file.content_type)
         return record.model_dump()
+
+    @app.get("/api/fs/roots")
+    def fs_roots():
+        return {"roots": list_filesystem_roots()}
+
+    @app.get("/api/fs/list")
+    def fs_list(path: str | None = None):
+        return browse_directory(path)
 
     @app.post("/api/jobs")
     def create_job(payload: JobCreate):

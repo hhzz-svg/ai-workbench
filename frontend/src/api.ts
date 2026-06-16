@@ -1,5 +1,7 @@
 import type {
   Artifact,
+  DirectoryListing,
+  FilesystemRoot,
   Job,
   ProviderPayload,
   ProviderProfile,
@@ -58,6 +60,9 @@ export const api = {
     providerProfileId: string | null;
   }) => request<Job>("/api/jobs", { method: "POST", body: JSON.stringify(payload) }),
   cancelJob: (jobId: string) => request<Job>(`/api/jobs/${jobId}/cancel`, { method: "POST" }),
+  listRoots: () => request<{ roots: FilesystemRoot[] }>("/api/fs/roots"),
+  listDirectory: (path?: string) =>
+    request<DirectoryListing>(`/api/fs/list${path ? `?path=${encodeURIComponent(path)}` : ""}`),
   downloadUrl: (artifactId: string) => `/api/artifacts/${artifactId}/download`,
   annotateArtifact: (artifactId: string, annotation: string) =>
     request<{ new_job_id: string; message: string }>(`/api/artifacts/${artifactId}/annotate`, {

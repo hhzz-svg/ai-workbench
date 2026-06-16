@@ -1498,3 +1498,241 @@ button.metric:hover {
     justify-content: center;
   }
 }
+
+/* 输出路径输入行 */
+.path-input-row {
+  display: flex;
+  gap: var(--s2);
+  align-items: stretch;
+}
+
+.path-input-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.path-browse {
+  flex-shrink: 0;
+  min-height: 0;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+/* 模态弹窗 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: var(--s4);
+}
+
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-pop);
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-head strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  border-top: 1px solid var(--border);
+}
+
+.modal-foot .ghost-button,
+.modal-foot .primary-button {
+  min-height: 38px;
+  padding: 0 16px;
+}
+
+/* 目录选择器 */
+.dir-roots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: var(--s3) var(--s4) 0;
+}
+
+.dir-root-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dir-root-chip:hover {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+}
+
+.dir-current {
+  padding: var(--s2) var(--s4);
+  border-bottom: 1px solid var(--border);
+}
+
+.dir-current-path {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.dir-list {
+  flex: 1;
+  overflow: auto;
+  padding: var(--s2);
+  min-height: 220px;
+}
+
+.dir-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+}
+
+.dir-row:hover {
+  background: var(--surface-2);
+}
+
+.dir-row.up {
+  color: var(--muted);
+}
+
+.dir-row svg:first-child {
+  color: var(--brand);
+  flex-shrink: 0;
+}
+
+.dir-row span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dir-row-caret {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.dir-empty,
+.dir-error {
+  padding: var(--s4);
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.dir-error {
+  color: var(--st-failed-fg);
+}
+
+/* 风格细化选项组 */
+.style-options {
+  display: grid;
+  gap: var(--s4);
+}
+
+.option-group {
+  display: grid;
+  gap: 8px;
+}
+
+.option-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.option-group-head strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.option-group-head small {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.option-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.option-chip {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.option-chip:hover {
+  border-color: var(--brand);
+  color: var(--brand-strong);
+}
+
+.option-chip.active {
+  border-color: var(--brand);
+  background: var(--brand-tint);
+  color: var(--brand-strong);
+}
+
+.option-custom {
+  font-size: 12px;
+}
+
+.reference-upload {
+  min-height: 44px;
+  font-size: 12px;
+  gap: 8px;
+}

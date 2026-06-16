@@ -252,3 +252,58 @@ def test_clear_failed_jobs_removes_only_failed_and_canceled(tmp_path):
     assert response.json() == {"deleted": 2}
     remaining_ids = {job["id"] for job in client.get("/api/jobs").json()}
     assert remaining_ids == {succeeded.id}
+
+
+def test_fs_roots_returns_at_least_one_root(tmp_path):
+    app = create_app(data_dir=tmp_path, start_worker=False)
+    client = TestClient(app)
+
+    response = client.get("/api/fs/roots")
+
+    assert response.status_code == 200
+    roots = response.json()["roots"]
+    assert len(roots) >= 1
+    assert all("path" in r and "name" in r for r in roots)
+
+
+def test_fs_list_lists_subdirectories(tmp_path):
+    browse_root = tmp_path / "browse_root"
+    browse_root.mkdir()
+    (browse_root / "alpha").mkdir()
+    (browse_root / "beta").mkdir()
+    (browse_root / ".hidden").mkdir()
+    (browse_root / "note.txt").write_text("x", encoding="utf-8")
+    app = create_app(data_dir=tmp_path, start_worker=False)
+    client = TestClient(app)
+
+    response = client.get("/api/fs/list", params={"path": str(browse_root)})
+
+    assert response.status_code == 200
+    body = response.json()
+    names = [entry["name"] for entry in body["entries"]]
+    # 只列目录，不列文件，且跳过隐藏目录
+    assert names == ["alpha", "beta"]
+    assert body["path"] == str(browse_root)
+    assert body["parent"] == str(tmp_path)
+
+
+def test_fs_list_rejects_relative_path(tmp_path):
+    app = create_app(data_dir=tmp_path, start_worker=False)
+    client = TestClient(app)
+
+    response = client.get("/api/fs/list", params={"path": "relative/dir"})
+
+    assert response.status_code == 400
+    assert "绝对路径" in response.json()["detail"]
+
+
+def test_fs_list_rejects_file_path(tmp_path):
+    target = tmp_path / "note.txt"
+    target.write_text("x", encoding="utf-8")
+    app = create_app(data_dir=tmp_path, start_worker=False)
+    client = TestClient(app)
+
+    response = client.get("/api/fs/list", params={"path": str(target)})
+
+    assert response.status_code == 400
+    assert "文件夹" in response.json()["detail"]

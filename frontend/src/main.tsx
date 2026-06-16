@@ -9,12 +9,16 @@ import {
   CircleStop,
   ClipboardCheck,
   Clock3,
+  CornerLeftUp,
   Download,
   ListFilter,
   FileArchive,
   FileText,
   FileUp,
+  Folder,
+  FolderOpen,
   Globe2,
+  HardDrive,
   Image as ImageIcon,
   KeyRound,
   Layers3,
@@ -35,6 +39,8 @@ import {
 import { api } from "./api";
 import type {
   Artifact,
+  DirectoryListing,
+  FilesystemRoot,
   Job,
   JobEvent,
   JobStatus,
@@ -89,6 +95,34 @@ const formatChoices = [
   "PDF 学术海报",
   "PNG 视觉海报",
   "Markdown 文稿"
+];
+
+type StyleOptionGroup = {
+  key: string;
+  label: string;
+  hint: string;
+  choices: string[];
+};
+
+const styleOptionGroups: StyleOptionGroup[] = [
+  {
+    key: "projectStyle",
+    label: "项目风格",
+    hint: "整体设计调性",
+    choices: ["极简", "商务", "学术", "科技感", "杂志编辑", "活泼"]
+  },
+  {
+    key: "colorScheme",
+    label: "配色偏好",
+    hint: "主色调方向",
+    choices: ["蓝调", "暖调", "黑白", "莫兰迪", "品牌色"]
+  },
+  {
+    key: "iconStyle",
+    label: "图标风格",
+    hint: "图标与装饰元素",
+    choices: ["线性", "填色", "手绘", "拟物", "无图标"]
+  }
 ];
 
 const languageLabels: Record<string, string> = {
@@ -395,6 +429,96 @@ function Metric({
   );
 }
 
+function DirectoryPicker({
+  initialPath,
+  onSelect,
+  onClose
+}: {
+  initialPath?: string;
+  onSelect: (path: string) => void;
+  onClose: () => void;
+}) {
+  const [listing, setListing] = useState<DirectoryListing | null>(null);
+  const [roots, setRoots] = useState<FilesystemRoot[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async (path?: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await api.listDirectory(path);
+      setListing(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "无法读取该文件夹");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    api.listRoots().then((r) => setRoots(r.roots)).catch(() => setRoots([]));
+    load(initialPath && initialPath.trim() ? initialPath.trim() : undefined).catch(() => undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="modal-card dir-picker" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-head">
+          <strong><FolderOpen size={18} /> 选择输出文件夹</strong>
+          <button type="button" className="icon-button" onClick={onClose} aria-label="关闭"><X size={18} /></button>
+        </div>
+
+        {roots.length > 0 && (
+          <div className="dir-roots">
+            {roots.map((root) => (
+              <button type="button" key={root.path} className="dir-root-chip" onClick={() => load(root.path)} title={root.path}>
+                <HardDrive size={14} /> {root.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="dir-current" title={listing?.path}>
+          <span className="dir-current-path">{listing?.path ?? "加载中…"}</span>
+        </div>
+
+        <div className="dir-list">
+          {listing?.parent && (
+            <button type="button" className="dir-row up" onClick={() => load(listing.parent ?? undefined)}>
+              <CornerLeftUp size={16} /> <span>上级目录</span>
+            </button>
+          )}
+          {loading && <p className="dir-empty">读取中…</p>}
+          {error && <p className="dir-error">{error}</p>}
+          {!loading && !error && listing && listing.entries.length === 0 && (
+            <p className="dir-empty">该文件夹下没有子文件夹</p>
+          )}
+          {!loading && !error && listing?.entries.map((entry) => (
+            <button type="button" className="dir-row" key={entry.path} onClick={() => load(entry.path)}>
+              <Folder size={16} /> <span>{entry.name}</span>
+              <ChevronRight size={14} className="dir-row-caret" />
+            </button>
+          ))}
+        </div>
+
+        <div className="modal-foot">
+          <button type="button" className="ghost-button" onClick={onClose}>取消</button>
+          <button
+            type="button"
+            className="primary-button"
+            disabled={!listing?.path}
+            onClick={() => { if (listing?.path) { onSelect(listing.path); onClose(); } }}
+          >
+            <CheckCircle2 size={16} /> 选定此处
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onCreated: (job: Job) => void }) {
   const [providerId, setProviderId] = useState<string>("");
   const [prompt, setPrompt] = useState("");
@@ -407,6 +531,11 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [outputPath, setOutputPath] = useState("");
+  const [showPicker, setShowPicker] = useState(false);
+  const [styleChoices, setStyleChoices] = useState<Record<string, string>>({});
+  const [styleCustom, setStyleCustom] = useState<Record<string, string>>({});
+  const [referenceNote, setReferenceNote] = useState("");
+  const [referenceFiles, setReferenceFiles] = useState<UploadedFile[]>([]);
 
   const uploadFiles = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
@@ -429,6 +558,31 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
     setSelectedConstraints((current) =>
       current.includes(choice) ? current.filter((item) => item !== choice) : [...current, choice]
     );
+  };
+
+  const toggleStyleChoice = (groupKey: string, choice: string) => {
+    setStyleChoices((current) => {
+      const next = { ...current };
+      if (next[groupKey] === choice) {
+        delete next[groupKey];
+      } else {
+        next[groupKey] = choice;
+      }
+      return next;
+    });
+  };
+
+  const uploadReference = async (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    setBusy(true);
+    try {
+      const uploaded = await Promise.all(Array.from(fileList).map((file) => api.uploadFile(file)));
+      setReferenceFiles((current) => [...current, ...uploaded]);
+    } catch (error) {
+      alert(`参考图上传失败：${error instanceof Error ? error.message : "未知错误"}`);
+    } finally {
+      setBusy(false);
+    }
   };
 
   const applyTemplate = (template: ProductTemplate) => {
@@ -474,6 +628,10 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
     setSelectedConstraints(["不要编造信息"]);
     setCustomConstraints("");
     setSelectedTemplateId(null);
+    setStyleChoices({});
+    setStyleCustom({});
+    setReferenceNote("");
+    setReferenceFiles([]);
   };
 
   const submit = async () => {
@@ -491,15 +649,29 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
         template: selectedTemplateId
       };
 
+      // 结构化风格选项：选中推荐项或填了自定义才进 options，否则保持默认
+      for (const group of styleOptionGroups) {
+        const picked = styleChoices[group.key];
+        const custom = (styleCustom[group.key] ?? "").trim();
+        const value = custom || picked;
+        if (value) options[group.key] = value;
+      }
+      if (referenceNote.trim()) {
+        options.referenceNote = referenceNote.trim();
+      }
+
       // 如果指定了输出路径，添加到 options
       if (outputPath.trim()) {
         options.outputPath = outputPath.trim();
       }
 
+      // 参考图作为资料一并提交
+      const allFileIds = [...files, ...referenceFiles].map((file) => file.id);
+
       const job = await api.createJob({
         skillType: "auto",
         prompt,
-        fileIds: files.map((file) => file.id),
+        fileIds: allFileIds,
         options,
         providerProfileId: providerId || null
       });
@@ -508,6 +680,10 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
       setSelectedTemplateId(null);
       setShowAdvanced(false);
       setOutputPath("");
+      setStyleChoices({});
+      setStyleCustom({});
+      setReferenceNote("");
+      setReferenceFiles([]);
       onCreated(job);
     } catch (error) {
       alert(`创建任务失败：${error instanceof Error ? error.message : "未知错误"}`);
@@ -579,14 +755,27 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
 
       <label>
         输出文件存储路径（可选）
-        <input
-          type="text"
-          value={outputPath}
-          onChange={(event) => setOutputPath(event.target.value)}
-          placeholder="例如：C:\Users\Documents\outputs 或留空使用默认路径"
-        />
-        <small className="input-hint">留空将使用默认输出目录</small>
+        <div className="path-input-row">
+          <input
+            type="text"
+            value={outputPath}
+            onChange={(event) => setOutputPath(event.target.value)}
+            placeholder="例如：C:\Users\Documents\outputs 或留空使用默认路径"
+          />
+          <button type="button" className="secondary-button path-browse" onClick={() => setShowPicker(true)}>
+            <FolderOpen size={16} /> 浏览
+          </button>
+        </div>
+        <small className="input-hint">留空将使用默认输出目录，或点「浏览」直接在磁盘里选择文件夹</small>
       </label>
+
+      {showPicker && (
+        <DirectoryPicker
+          initialPath={outputPath}
+          onSelect={(path) => setOutputPath(path)}
+          onClose={() => setShowPicker(false)}
+        />
+      )}
 
       <button
         type="button"
@@ -624,6 +813,54 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
               </label>
             ))}
             <input value={customConstraints} onChange={(event) => setCustomConstraints(event.target.value)} placeholder="补充其他要求" />
+          </fieldset>
+
+          <fieldset className="constraint-box style-options">
+            <legend>风格细化（不选则默认）</legend>
+            {styleOptionGroups.map((group) => (
+              <div className="option-group" key={group.key}>
+                <div className="option-group-head">
+                  <strong>{group.label}</strong>
+                  <small>{group.hint}</small>
+                </div>
+                <div className="option-chips">
+                  {group.choices.map((choice) => (
+                    <button
+                      type="button"
+                      key={choice}
+                      className={`option-chip ${styleChoices[group.key] === choice ? "active" : ""}`}
+                      onClick={() => toggleStyleChoice(group.key, choice)}
+                    >
+                      {choice}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  className="option-custom"
+                  value={styleCustom[group.key] ?? ""}
+                  onChange={(event) => setStyleCustom((current) => ({ ...current, [group.key]: event.target.value }))}
+                  placeholder={`自定义${group.label}（优先于上方选择）`}
+                />
+              </div>
+            ))}
+
+            <div className="option-group">
+              <div className="option-group-head">
+                <strong>参考风格</strong>
+                <small>上传参考图或描述想要的风格</small>
+              </div>
+              <input
+                className="option-custom"
+                value={referenceNote}
+                onChange={(event) => setReferenceNote(event.target.value)}
+                placeholder="例如：参考苹果发布会风格 / 这个链接的排版"
+              />
+              <label className="upload-zone reference-upload">
+                <ImageIcon size={16} />
+                <span>{referenceFiles.length ? `已添加 ${referenceFiles.length} 张参考图` : "上传参考图（可选）"}</span>
+                <input type="file" accept="image/*" multiple onChange={(event) => uploadReference(event.target.files)} />
+              </label>
+            </div>
           </fieldset>
         </>
       )}

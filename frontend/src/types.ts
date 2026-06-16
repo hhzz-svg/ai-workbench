@@ -69,3 +69,21 @@ export type JobEvent = {
   message: string;
   job_id: string;
 };
+
+export type DirectoryEntry = {
+  name: string;
+  path: string;
+  is_dir: boolean;
+};
+
+export type DirectoryListing = {
+  path: string;
+  parent: string | null;
+  separator: string;
+  entries: DirectoryEntry[];
+};
+
+export type FilesystemRoot = {
+  name: string;
+  path: string;
+};
