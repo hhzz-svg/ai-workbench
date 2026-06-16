@@ -53,7 +53,7 @@ cd ai-workbench
 # 后续使用:直接双击 start.bat
 ```
 
-详细说明见 [ONE_CLICK_START.md](ONE_CLICK_START.md)
+详细说明见 [docs/ONE_CLICK_START.md](docs/ONE_CLICK_START.md)
 
 ---
 
@@ -232,7 +232,7 @@ skill-workbench/
 - ✅ 精简产物显示：去除预览，只显示文件信息和路径
 - ✅ 改进 UI 动画和视觉效果
 
-详见 [UPDATES_V2.md](./UPDATES_V2.md)
+详见 [docs/UPDATES_V2.md](docs/UPDATES_V2.md)
 
 ## ⚠️ 注意事项
 

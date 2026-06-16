@@ -255,7 +255,7 @@ npm run build
 ## 发布流程
 
 1. 更新版本号（`package.json`, `pyproject.toml`）
-2. 更新 `README.md` 和 `UPDATES_V2.md`
+2. 更新 `README.md` 和 `docs/UPDATES_V2.md`
 3. 创建 Git tag
 4. 推送到 GitHub
 5. 创建 Release
@@ -263,7 +263,7 @@ npm run build
 ## 获取帮助
 
 - 查看 [README.md](README.md) 了解项目基础
-- 查看 [UPDATES_V2.md](UPDATES_V2.md) 了解最新更新
+- 查看 [docs/UPDATES_V2.md](docs/UPDATES_V2.md) 了解最新更新
 - 在 Issues 中提问
 - 查看现有的 Pull Requests
 
