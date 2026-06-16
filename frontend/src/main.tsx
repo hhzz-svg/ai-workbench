@@ -5,10 +5,12 @@ import {
   BookOpenText,
   Brush,
   CheckCircle2,
+  ChevronRight,
   CircleStop,
   ClipboardCheck,
   Clock3,
   Download,
+  ListFilter,
   FileArchive,
   FileText,
   FileUp,
@@ -70,8 +72,6 @@ const artifactKindLabels: Record<string, string> = {
   json: "配置",
   file: "文件"
 };
-
-const boardStatuses: JobStatus[] = ["pending", "running", "needs_input", "succeeded", "failed", "canceled"];
 
 const constraintChoices = [
   "不要编造信息",
@@ -179,6 +179,7 @@ function App() {
   const [events, setEvents] = useState<JobEvent[]>([]);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [view, setView] = useState<"create" | "settings">("create");
+  const [statusFilter, setStatusFilter] = useState<JobStatus | "all">("all");
   const selectedJob = jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null;
 
   const refresh = async () => {
@@ -227,6 +228,11 @@ function App() {
     for (const job of jobs) groups[job.status].push(job);
     return groups;
   }, [jobs]);
+
+  const visibleJobs = useMemo(() => {
+    const rows = statusFilter === "all" ? jobs : jobs.filter((job) => job.status === statusFilter);
+    return [...rows].sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1));
+  }, [jobs, statusFilter]);
 
   const clearFailed = async () => {
     await api.clearFailedJobs();
@@ -293,37 +299,53 @@ function App() {
         </header>
 
         <section className="summary-grid" aria-label="任务概览">
-          <Metric label="待处理" value={grouped.pending.length + grouped.needs_input.length} tone="amber" />
-          <Metric label="生成中" value={grouped.running.length} tone="blue" />
-          <Metric label="已交付" value={grouped.succeeded.length} tone="green" />
-          <Metric label="可清理" value={unfinishedCount} tone="red" />
+          <Metric label="待处理" value={grouped.pending.length + grouped.needs_input.length} tone="amber"
+            active={statusFilter === "pending"}
+            onClick={() => setStatusFilter((current) => (current === "pending" ? "all" : "pending"))} />
+          <Metric label="生成中" value={grouped.running.length} tone="blue"
+            active={statusFilter === "running"}
+            onClick={() => setStatusFilter((current) => (current === "running" ? "all" : "running"))} />
+          <Metric label="已交付" value={grouped.succeeded.length} tone="green"
+            active={statusFilter === "succeeded"}
+            onClick={() => setStatusFilter((current) => (current === "succeeded" ? "all" : "succeeded"))} />
+          <Metric label="可清理" value={unfinishedCount} tone="red"
+            active={statusFilter === "failed"}
+            onClick={() => setStatusFilter((current) => (current === "failed" ? "all" : "failed"))} />
         </section>
 
-        <section className="board" aria-label="任务看板">
-          {boardStatuses.map((status) => (
-            <div className="lane" key={status}>
-              <div className="lane-title">
-                <span>{statusLabels[status]}</span>
-                <b>{grouped[status].length}</b>
-              </div>
-              {grouped[status].length === 0 && <p className="lane-empty">暂无任务</p>}
-              {grouped[status].map((job) => (
-                <button
-                  key={job.id}
-                  type="button"
-                  className={`job-card ${selectedJob?.id === job.id ? "selected" : ""}`}
-                  onClick={() => { setSelectedJobId(job.id); setEvents([]); }}
-                >
-                  <span className={`status-dot ${job.status}`} />
-                  <span className="job-card-main">
-                    <strong>{typeName(job.skill_type)}</strong>
-                    <small>{job.prompt.slice(0, 120)}</small>
-                    <em>{formatDate(job.updated_at)}</em>
-                  </span>
-                </button>
-              ))}
-            </div>
-          ))}
+        <section className="job-list" aria-label="任务列表">
+          <div className="job-list-head">
+            <h3><ListFilter size={16} /> 任务列表</h3>
+            {statusFilter === "all" ? (
+              <span className="filter-state">{visibleJobs.length} 个任务</span>
+            ) : (
+              <button type="button" className="clear-filter" onClick={() => setStatusFilter("all")}>
+                仅看「{statusLabels[statusFilter]}」· 清除筛选
+              </button>
+            )}
+          </div>
+          {visibleJobs.length === 0 ? (
+            <p className="job-list-empty">
+              {statusFilter === "all" ? "还没有任务，从左侧新建一个开始。" : "该状态下暂无任务。"}
+            </p>
+          ) : (
+            visibleJobs.map((job) => (
+              <button
+                key={job.id}
+                type="button"
+                className={`job-row ${selectedJob?.id === job.id ? "selected" : ""}`}
+                onClick={() => { setSelectedJobId(job.id); setEvents([]); }}
+              >
+                <span className={`job-status ${job.status}`}>{statusLabels[job.status]}</span>
+                <span className="job-row-main">
+                  <strong>{typeName(job.skill_type)}</strong>
+                  <small>{job.prompt.slice(0, 140)}</small>
+                </span>
+                <span className="job-row-time">{formatDate(job.updated_at)}</span>
+                <span className="job-row-caret"><ChevronRight size={16} /></span>
+              </button>
+            ))
+          )}
         </section>
 
         {selectedJob ? (
@@ -338,6 +360,7 @@ function App() {
           <div className="empty-state">
             <WandSparkles size={24} />
             <span>新建一个任务后，这里会显示进度、记录和产物。</span>
+            <span className="empty-cta">在左侧选择一个方向、补充需求，点击「开始生成」。</span>
           </div>
         )}
       </section>
@@ -345,12 +368,30 @@ function App() {
   );
 }
 
-function Metric({ label, value, tone }: { label: string; value: number; tone: "blue" | "green" | "red" | "amber" }) {
+function Metric({
+  label,
+  value,
+  tone,
+  active,
+  onClick
+}: {
+  label: string;
+  value: number;
+  tone: "blue" | "green" | "red" | "amber";
+  active?: boolean;
+  onClick?: () => void;
+}) {
   return (
-    <div className={`metric ${tone}`}>
+    <button
+      type="button"
+      className={`metric ${tone} ${active ? "active" : ""}`}
+      onClick={onClick}
+      aria-pressed={active}
+      title={`筛选：${label}`}
+    >
       <span>{label}</span>
       <strong>{value}</strong>
-    </div>
+    </button>
   );
 }
 
