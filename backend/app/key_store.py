@@ -6,6 +6,27 @@ import os
 from pathlib import Path
 
 
+def _current_login() -> str:
+    """Return a stable login name for salting.
+
+    ``os.getlogin()`` raises ``OSError`` when there is no controlling
+    terminal (e.g. CI runners, daemons), so fall back to environment
+    variables and finally a constant. The exact value only needs to be
+    stable on a given machine, not globally unique.
+    """
+    try:
+        name = os.getlogin()
+        if name:
+            return name
+    except OSError:
+        pass
+    for var in ("USER", "USERNAME", "LOGNAME"):
+        value = os.environ.get(var)
+        if value:
+            return value
+    return "user"
+
+
 class KeyStore:
     """Best-effort local secret storage.
 
@@ -66,7 +87,7 @@ class KeyStore:
 
     @staticmethod
     def _machine_salt() -> bytes:
-        value = f"{os.getlogin() if hasattr(os, 'getlogin') else 'user'}:{os.name}".encode("utf-8", errors="ignore")
+        value = f"{_current_login()}:{os.name}".encode("utf-8", errors="ignore")
         return value or b"skill-workbench"
 
     def _encode(self, value: str) -> str:
