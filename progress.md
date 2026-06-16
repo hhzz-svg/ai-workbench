@@ -61,7 +61,8 @@
 ### Testing
 - 已确认本地 `dist/release/ai-workbench-windows-0.1.0.zip` 存在。
 - 已确认当前仓库没有 `v0.1.0` 标签，可用于触发首个 Release。
-- 待推送 `v0.1.0` 后，通过 GitHub Actions 和 Release 页面确认远端资产生成结果。
+- 已推送 `v0.1.0` 标签并确认 GitHub Actions Release workflow 成功完成。
+- 已确认 GitHub Release `AI Workbench v0.1.0` 存在，并包含 `ai-workbench-windows-0.1.0.zip` 资产。
 
 ### Notes
 - `.github/workflows/release.yml`：新增 tag 触发的 Release workflow，使用 `scripts/package-windows.ps1` 生成 Windows zip 并通过 `softprops/action-gh-release@v2` 上传。
