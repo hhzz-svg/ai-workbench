@@ -51,3 +51,20 @@
 - `dist/release/ai-workbench-windows-0.1.0.zip`：本地重新生成的发布资产，位于 git 忽略目录。
 - `progress.md`：追加本轮替换演示视频与验证记录。
 - 回滚方式：用 git revert 回退本轮提交；若只回退本地发布资产，删除 `dist/release/ai-workbench-windows-0.1.0.zip` 后重新运行打包脚本即可。
+
+## 2026-06-17 - Task: 配置 GitHub Release 自动发布
+### What was done
+- 新增 GitHub Actions Release workflow，推送 `v*` 标签时自动运行 Windows 打包脚本并上传 zip 到 GitHub Release。
+- 补充 Windows 发版文档，说明通过 `git tag` 和 `git push origin <tag>` 发布。
+- 处理 Chrome 页面上传本地 zip 受扩展权限限制的问题，改用 GitHub 远端自动打包上传，避免手动改浏览器扩展权限。
+
+### Testing
+- 已确认本地 `dist/release/ai-workbench-windows-0.1.0.zip` 存在。
+- 已确认当前仓库没有 `v0.1.0` 标签，可用于触发首个 Release。
+- 待推送 `v0.1.0` 后，通过 GitHub Actions 和 Release 页面确认远端资产生成结果。
+
+### Notes
+- `.github/workflows/release.yml`：新增 tag 触发的 Release workflow，使用 `scripts/package-windows.ps1` 生成 Windows zip 并通过 `softprops/action-gh-release@v2` 上传。
+- `docs/WINDOWS_RELEASE.md`：新增 GitHub Release 自动发布步骤。
+- `progress.md`：追加本轮发布流程配置记录。
+- 回滚方式：删除远端 `v0.1.0` 标签和对应 Release 后，用 git revert 回退本轮提交。

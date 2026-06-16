@@ -16,6 +16,17 @@ dist\release\ai-workbench-windows-<version>.zip
 
 这个压缩包可作为 GitHub Release 的 Windows 下载资产上传。
 
+## 发布到 GitHub Release
+
+仓库已配置 GitHub Actions。推送版本标签即可在 GitHub 上自动生成 Release，并上传 Windows zip：
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+后续版本先更新 `package.json` 的版本号，再推送对应的 `v<version>` 标签。
+
 ## 包内内容
 
 - `install.bat`：检测 Python、Node.js，安装前后端依赖，并提示 Codex CLI 为可选环境。
