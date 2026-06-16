@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Node.js 18+](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
+[![Node.js 20+](https://img.shields.io/badge/node-20+-green.svg)](https://nodejs.org/)
 
 本地 Web 工作台，统一集成多种创作类 Skill 接口，把论文、资料和需求交给对应的 Skill，生成演示文稿、学术润色稿、网页演示、学术海报和视觉海报。数据完全本地化，隐私安全可控。
 

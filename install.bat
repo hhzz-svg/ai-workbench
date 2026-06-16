@@ -31,7 +31,7 @@ node --version >nul 2>&1
 if errorlevel 1 (
     echo ❌ 未检测到 Node.js
     echo.
-    echo 请先安装 Node.js 18 或更高版本：
+    echo 请先安装 Node.js 20 或更高版本：
     echo https://nodejs.org/
     pause
     exit /b 1

@@ -71,7 +71,7 @@ npm run dev
 
 ### 提示"未检测到 Node.js"
 
-1. 下载安装 Node.js 18+: https://nodejs.org/
+1. 下载安装 Node.js 20+: https://nodejs.org/
 2. 重启命令行窗口后重试
 
 ### 端口被占用
