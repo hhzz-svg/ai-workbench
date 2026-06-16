@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from .adapters import get_adapter
+from .api_runner import ApiRunner
 from .key_store import KeyStore
 from .models import Artifact, Job
 from .provider_validation import first_shape_error, shape_from_profile
@@ -23,6 +24,7 @@ class JobManager:
         self.jobs_dir = data_dir / "jobs"
         self.uploads_dir = data_dir / "uploads"
         self.runner = CodexRunner()
+        self.api_runner = ApiRunner()
         self.max_run_seconds = 30 * 60
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
         self.events: dict[str, queue.Queue[dict[str, Any]]] = {}
@@ -67,22 +69,32 @@ class JobManager:
 
             provider = self.store.get_provider(job.provider_profile_id)
             api_key = self.key_store.get(provider.id) if provider else None
+            provider_shape = shape_from_profile(provider, api_key) if provider else None
             if provider:
-                provider_error = first_shape_error(shape_from_profile(provider, api_key), require_api_key=True)
+                provider_error = first_shape_error(provider_shape, require_api_key=True)
                 if provider_error:
                     self.store.update_job_status(job.id, "failed", error=provider_error)
                     self._emit(job.id, {"type": "job.failed", "message": provider_error})
                     return
 
-            result = self.runner.run(
-                prompt_file=prompt_file,
-                workspace=workspace,
-                provider=provider,
-                api_key=api_key,
-                on_event=lambda event: self._emit(job.id, event),
-                should_cancel=lambda: job.id in self.canceled,
-                max_seconds=self.max_run_seconds,
-            )
+            if provider_shape:
+                result = self.api_runner.run(
+                    prompt=context.prompt,
+                    workspace=workspace,
+                    provider=provider_shape,
+                    expected_outputs=context.expected_outputs,
+                    on_event=lambda event: self._emit(job.id, event),
+                )
+            else:
+                result = self.runner.run(
+                    prompt_file=prompt_file,
+                    workspace=workspace,
+                    provider=None,
+                    api_key=None,
+                    on_event=lambda event: self._emit(job.id, event),
+                    should_cancel=lambda: job.id in self.canceled,
+                    max_seconds=self.max_run_seconds,
+                )
 
             if job.id in self.canceled:
                 self.store.update_job_status(job.id, "canceled")
@@ -166,6 +178,8 @@ class JobManager:
     def _needs_input(workspace: Path) -> bool:
         for path in workspace.glob("**/*"):
             if path.is_file() and path.suffix.lower() in {".txt", ".md", ".log"}:
+                if path.name == "prompt.txt":
+                    continue
                 try:
                     if "NEEDS_INPUT" in path.read_text(encoding="utf-8", errors="ignore"):
                         return True

@@ -554,6 +554,12 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
   const [referenceNote, setReferenceNote] = useState("");
   const [referenceFiles, setReferenceFiles] = useState<UploadedFile[]>([]);
 
+  useEffect(() => {
+    if (!providerId && providers.length > 0) {
+      setProviderId(providers[0].id);
+    }
+  }, [providerId, providers]);
+
   const uploadFiles = async (fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
     setBusy(true);
@@ -753,11 +759,12 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
       <label>
         运行配置
         <select value={providerId} onChange={(event) => setProviderId(event.target.value)}>
-          <option value="">本机默认（无需在此配置 Key）</option>
+          <option value="">本机 Codex（可选，无需在此配置 Key）</option>
           {providers.map((provider) => (
             <option key={provider.id} value={provider.id}>{provider.name} · {provider.model}</option>
           ))}
         </select>
+        <small className="input-hint">推荐在设置中保存 API 配置；不选配置时才使用本机 Codex 环境。</small>
       </label>
 
       <label>
@@ -991,11 +998,11 @@ function SettingsPanel({ providers, skills, onSaved }: { providers: ProviderProf
     <section className="panel settings-panel">
       <div className="default-card">
         <div>
-          <strong><MonitorCheck size={17} /> 本机默认环境</strong>
-          <span>直接使用当前电脑的运行环境，通常不需要在这里填写 API Key。</span>
+          <strong><MonitorCheck size={17} /> 本机 Codex 环境（可选）</strong>
+          <span>适合已经安装 Codex CLI 的用户；普通用户保存下方 API 配置即可运行任务。</span>
         </div>
         <button className="secondary-button" disabled={busy} onClick={testDefault} type="button">
-          <CheckCircle2 size={16} /> 验证可用
+          <CheckCircle2 size={16} /> 检测 Codex
         </button>
       </div>
 
@@ -1009,7 +1016,7 @@ function SettingsPanel({ providers, skills, onSaved }: { providers: ProviderProf
         ))}
       </div>
 
-      <div className="settings-title"><KeyRound size={18} /> 备用模型配置</div>
+      <div className="settings-title"><KeyRound size={18} /> API 模型配置（推荐）</div>
       <label>配置名称<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} placeholder="例如：学校代理 / 本地网关 / 公司接口" /></label>
       <label>Base URL<input value={form.base_url} onChange={(event) => setForm({ ...form, base_url: event.target.value })} placeholder="https://api.example.com/v1" /></label>
       <label>模型<input value={form.model} onChange={(event) => setForm({ ...form, model: event.target.value })} placeholder="gpt-5.5" /></label>
@@ -1032,7 +1039,7 @@ function SettingsPanel({ providers, skills, onSaved }: { providers: ProviderProf
       </div>
 
       <div className="provider-list" aria-label="已保存配置">
-        {providers.length === 0 && <p className="muted provider-empty">还没有备用配置。本机默认环境可以直接使用。</p>}
+        {providers.length === 0 && <p className="muted provider-empty">还没有 API 配置。普通用户建议先保存一个 OpenAI-compatible API 配置。</p>}
         {providers.map((provider) => (
           <div className="provider-row" key={provider.id}>
             <div>

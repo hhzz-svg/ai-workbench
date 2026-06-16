@@ -1,0 +1,53 @@
+## 2026-06-16 - Task: API 优先运行、Windows 发布包与 README 首屏
+### What was done
+- 将任务执行路径调整为 API 优先：用户选择已保存 API 配置时，后端直连 OpenAI-compatible API 写入本地产物；未选择配置时才使用本机 Codex 环境。
+- 将前端、安装脚本和快速启动文档改为“API 配置推荐，Codex CLI 可选检测”的表达。
+- 生成 README 专用 10 秒演示视频，并重写 README 第一屏，让价值主张、适合人群、视频入口和快速开始更靠前。
+- 新增 Windows 发布包脚本和示例资料，并生成本地 release 资产 `dist/release/ai-workbench-windows-0.1.0.zip`。
+
+### Testing
+- `npm run test:backend`：通过，50 passed。
+- `npm run test:frontend-localization`：通过。
+- `npm run build:web`：通过。
+- 校验 `dist/release/ai-workbench-windows-0.1.0.zip` 包含 `install.bat`、`start.bat`、`README.md`、`examples/sample-paper-notes.md`、`landing-page/assets/readme-demo.mp4`。
+
+### Notes
+- `backend/app/api_runner.py`：新增 API 直连执行器，解析模型返回的 fenced file blocks 并写入本地产物。
+- `backend/app/jobs.py`：接入 API runner 分支，并修复 `prompt.txt` 中 `NEEDS_INPUT` 被误判的问题。
+- `backend/tests/test_api_runner.py`：新增 API 产物写入、安全路径和 fallback 测试。
+- `backend/tests/test_jobs.py`：新增 API 分支执行测试和 `NEEDS_INPUT` 扫描测试。
+- `frontend/src/main.tsx`：将运行配置改为保存 API 配置后默认选中，Codex 作为可选环境。
+- `frontend/tests/localization.test.mjs`：同步前端中文文案断言。
+- `install.bat`、`start.bat`：增加 Codex 可选检测和 API 配置提示。
+- `README.md`：重写首屏、快速开始和模型配置说明，并链接 README 演示视频。
+- `docs/ONE_CLICK_START.md`、`docs/QUICK_START.md`：同步 API 优先使用路径。
+- `docs/WINDOWS_RELEASE.md`：新增 Windows 发布包说明。
+- `scripts/package-windows.ps1`：新增 Windows zip 打包脚本。
+- `examples/sample-paper-notes.md`：新增首次试跑示例资料。
+- `landing-page/assets/readme-demo.mp4`：新增 README 专用演示视频。
+- `dist/release/ai-workbench-windows-0.1.0.zip`：本地生成的发布资产，位于 git 忽略目录。
+- 回滚方式：用 git revert/checkout 回退上述已跟踪文件；删除 `dist/release/ai-workbench-windows-0.1.0.zip` 可移除本地发布资产。
+
+## 2026-06-16 - Task: 替换演示视频为新面板版本
+### What was done
+- 将旧界面演示视频替换为当前“创作工作台/生成看板”新面板画面，README 中的展示视频不再露出旧 UI。
+- 重新生成 README 首屏视觉图，让首屏右侧预览也同步到新面板。
+- 重新生成本地 Windows 发布包，确保下载包内包含新的演示视频素材。
+
+### Testing
+- 抽帧检查 `landing-page/assets/readme-demo.mp4` 和 `landing-page/assets/workbench-demo.mp4`：画面均为当前新面板。
+- `ffprobe` 校验 `landing-page/assets/workbench-demo.mp4`：1920x1080，8 秒。
+- `ffprobe` 校验 `landing-page/assets/readme-demo.mp4`：1280x720，10 秒。
+- `npm run test:backend`：通过，50 passed。
+- `npm run test:frontend-localization`：通过。
+- `npm run build:web`：通过。
+- 校验 `dist/release/ai-workbench-windows-0.1.0.zip` 包含新的 `landing-page/assets/readme-demo.mp4` 和 `landing-page/assets/workbench-demo.mp4`。
+
+### Notes
+- `landing-page/assets/workbench-console-wide.png`：更新为当前新面板截图，作为视频画面来源。
+- `landing-page/assets/workbench-demo.mp4`：替换为当前新面板演示视频。
+- `landing-page/assets/key-visual.png`：重新生成 README 首屏视觉图，右侧预览同步新面板。
+- `landing-page/assets/readme-demo.mp4`：重新生成 README 内嵌演示视频。
+- `dist/release/ai-workbench-windows-0.1.0.zip`：本地重新生成的发布资产，位于 git 忽略目录。
+- `progress.md`：追加本轮替换演示视频与验证记录。
+- 回滚方式：用 git revert 回退本轮提交；若只回退本地发布资产，删除 `dist/release/ai-workbench-windows-0.1.0.zip` 后重新运行打包脚本即可。
