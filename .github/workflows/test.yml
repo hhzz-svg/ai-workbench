@@ -24,7 +24,7 @@ jobs:
           pip install -r backend/requirements.txt
 
       - name: Run backend tests
-        run: python -m pytest backend/tests -v
+        run: python -m pytest backend/tests -v -ra --tb=long -p no:cacheprovider
 
   frontend:
     runs-on: ubuntu-latest

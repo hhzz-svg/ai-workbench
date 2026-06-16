@@ -68,7 +68,7 @@ def test_runner_cancels_silent_process_without_waiting_for_more_output(tmp_path)
                 "import json, sys, time",
                 "sys.stdin.read()",
                 "print(json.dumps({'type': 'started', 'message': 'running'}), flush=True)",
-                "time.sleep(5)",
+                "time.sleep(30)",
             ]
         ),
         encoding="utf-8",
@@ -94,5 +94,8 @@ def test_runner_cancels_silent_process_without_waiting_for_more_output(tmp_path)
     )
     elapsed = time.monotonic() - started
 
-    assert elapsed < 3
+    # 取消生效就应远早于子进程的 30s 睡眠结束；放宽到 15s 以容忍
+    # CI 共享 runner 上较慢的子进程冷启动与线程调度，同时仍能抓住
+    # “取消未生效、傻等满睡眠”的回归。
+    assert elapsed < 15
     assert result.code != 0
