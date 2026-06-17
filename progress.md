@@ -69,3 +69,16 @@
 - `docs/WINDOWS_RELEASE.md`：新增 GitHub Release 自动发布步骤。
 - `progress.md`：追加本轮发布流程配置记录。
 - 回滚方式：删除远端 `v0.1.0` 标签和对应 Release 后，用 git revert 回退本轮提交。
+
+## 2026-06-17 - Task: README 增加 Release 下载入口
+### What was done
+- 在 README 首屏演示视频下方新增 Windows 发布包直达链接。
+- 将 Windows 快速开始里的下载入口改为 `AI Workbench v0.1.0 Release`，并明确 zip 文件名。
+
+### Testing
+- 检查 README 中已出现 `https://github.com/hhzz-svg/ai-workbench/releases/tag/v0.1.0`。
+
+### Notes
+- `README.md`：新增正式 Release 下载入口，并更新 Windows 快速开始下载说明。
+- `progress.md`：追加本轮 README 链接更新记录。
+- 回滚方式：用 git revert 回退本轮提交，或从 README 删除本轮新增的 Release 链接文本。
