@@ -82,3 +82,22 @@
 - `README.md`：新增正式 Release 下载入口，并更新 Windows 快速开始下载说明。
 - `progress.md`：追加本轮 README 链接更新记录。
 - 回滚方式：用 git revert 回退本轮提交，或从 README 删除本轮新增的 Release 链接文本。
+
+## 2026-06-17 - Task: 修复前端启动脚本
+### What was done
+- 修复 `start.ps1` 和 `start-lan.ps1` 的脚本根目录解析，避免前端路径被解析到错误位置。
+- 将 PowerShell 启动脚本中的 `npm` 调用改为 `npm.cmd`，避免 Windows 执行策略拦截 `npm.ps1`。
+- 简化 `start.bat`，让它委托 `start.ps1` 启动，避免 cmd 直接解析中文提示时出错。
+
+### Testing
+- 复现原问题：`start.ps1` 缺失时，`start.bat` 调用 PowerShell 启动失败，前端不会监听 `5173`。
+- 运行修复后的 `start.bat`，确认输出 `Opening browser on http://127.0.0.1:5173`。
+- 请求 `http://127.0.0.1:5173` 返回 `200`。
+- 通过 Chrome 打开 `http://127.0.0.1:5173/`，确认页面标题为 `创作工作台`，页面包含工作台首屏内容。
+
+### Notes
+- `start.ps1`：新增稳定的 `$root` 解析，并改用 `npm.cmd`。
+- `start-lan.ps1`：同步 `$root` 和 `npm.cmd` 修复。
+- `start.bat`：改为 ASCII 启动壳，先检查依赖，再调用 `start.ps1`。
+- `progress.md`：追加本轮前端启动修复记录。
+- 回滚方式：用 git revert 回退本轮提交。
