@@ -36,6 +36,9 @@ class JobManager:
     def enqueue(self, job: Job) -> None:
         self.executor.submit(self._run_job, job.id)
 
+    def can_run_default_provider(self) -> bool:
+        return shutil.which("codex") is not None
+
     def cancel(self, job_id: str) -> Job:
         self.canceled.add(job_id)
         self._emit(job_id, {"type": "job.canceled", "message": "Cancellation requested."})

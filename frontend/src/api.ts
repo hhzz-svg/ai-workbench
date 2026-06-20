@@ -6,17 +6,44 @@ import type {
   ProviderPayload,
   ProviderProfile,
   ProviderValidationResult,
+  HealthStatus,
   SkillInfo,
   UploadedFile
 } from "./types";
 
 export const API_BASE = import.meta.env.VITE_API_BASE || "";
 
+export class ApiConnectionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ApiConnectionError";
+  }
+}
+
+function buildApiErrorMessage(error: unknown): string {
+  const raw = error instanceof Error ? error.message : String(error || "");
+  const text = raw.toLowerCase();
+  if (
+    !raw ||
+    text.includes("failed to fetch") ||
+    text.includes("networkerror") ||
+    text.includes("load failed")
+  ) {
+    return "无法连接到本地后端。请保持 start.bat 窗口打开，或重新运行 start.bat 后再点“重新连接”。";
+  }
+  return raw;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: init?.body instanceof FormData ? undefined : { "Content-Type": "application/json" },
-    ...init
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      headers: init?.body instanceof FormData ? undefined : { "Content-Type": "application/json" },
+      ...init
+    });
+  } catch (error) {
+    throw new ApiConnectionError(buildApiErrorMessage(error));
+  }
   if (!response.ok) {
     const detail = await response.text();
     let message = detail;
@@ -32,6 +59,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  health: () => request<HealthStatus>("/api/health"),
   skills: () => request<SkillInfo[]>("/api/skills"),
   jobs: () => request<Job[]>("/api/jobs"),
   providers: () => request<ProviderProfile[]>("/api/providers"),
@@ -63,7 +91,8 @@ export const api = {
   listRoots: () => request<{ roots: FilesystemRoot[] }>("/api/fs/roots"),
   listDirectory: (path?: string) =>
     request<DirectoryListing>(`/api/fs/list${path ? `?path=${encodeURIComponent(path)}` : ""}`),
-  downloadUrl: (artifactId: string) => `/api/artifacts/${artifactId}/download`,
+  downloadUrl: (artifactId: string) => `${API_BASE}/api/artifacts/${artifactId}/download`,
+  eventUrl: (jobId: string) => `${API_BASE}/api/jobs/${jobId}/events`,
   annotateArtifact: (artifactId: string, annotation: string) =>
     request<{ new_job_id: string; message: string }>(`/api/artifacts/${artifactId}/annotate`, {
       method: "POST",

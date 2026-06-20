@@ -33,6 +33,13 @@ export type ProviderValidationResult = {
   message: string;
 };
 
+export type HealthStatus = {
+  ok: boolean;
+  codex_available: boolean;
+  codex_version?: string | null;
+  data_dir: string;
+};
+
 export type UploadedFile = {
   id: string;
   name: string;

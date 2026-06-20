@@ -101,3 +101,68 @@
 - `start.bat`：改为 ASCII 启动壳，先检查依赖，再调用 `start.ps1`。
 - `progress.md`：追加本轮前端启动修复记录。
 - 回滚方式：用 git revert 回退本轮提交。
+
+## 2026-06-20 - Task: 补完整 Windows 首次启动体验
+### What was done
+- 恢复并加固 Windows 本机和局域网启动脚本，确保 `start.bat` 委托的 `start.ps1` 存在，并在服务就绪后打开工作台。
+- 让 `install.bat` 和 `start.bat` 从脚本所在目录运行，并在缺少前端或后端依赖时先自动进入安装流程。
+- 为前端增加全局后端断连提示和“重新连接”入口；首次无 API 配置时增加“去设置 API”引导。
+- 后端在没有 API 配置且本机没有 Codex CLI 时即时拒绝创建任务，避免新用户任务排队后才失败。
+- 同步 README 和快速启动文档，补充断连处理、API 配置要求和启动脚本行为。
+
+### Testing
+- `node frontend/tests/startup-experience.test.mjs`：先失败于 `start.ps1` 缺失；修复后通过。
+- `npm --prefix frontend test`：通过，2 个前端测试文件全部通过。
+- `npm run test:backend`：通过，51 passed。
+- `npm run build:web`：通过，Vite 构建成功。
+- PowerShell 脚本解析检查：`start.ps1` 和 `start-lan.ps1` 均通过 `scriptblock` 解析。
+- `cmd /c "echo.|start.bat"`：通过，输出 `Opening browser on http://127.0.0.1:5173`；验证后已停止本轮拉起的项目后台进程。
+
+### Notes
+- `install.bat`：固定工作目录到脚本所在目录，并增加项目结构检查。
+- `start.bat`：启动前检查前端与后端依赖，缺失时自动运行安装脚本。
+- `start.ps1`：恢复并加固本机启动脚本，等待 API/UI 就绪，输出端口占用提示。
+- `start-lan.ps1`：恢复并加固局域网启动脚本，等待 API/UI 就绪后输出局域网访问地址。
+- `frontend/src/api.ts`：统一 API 连接失败提示，并让下载地址和事件流支持 `VITE_API_BASE`。
+- `frontend/src/main.tsx`：增加后端断连横幅、重连入口、健康检查和首次 API 配置引导。
+- `frontend/src/styles.css`：新增断连横幅和首次配置提示样式，适配移动端。
+- `frontend/src/types.ts`：新增健康检查返回类型。
+- `frontend/tests/startup-experience.test.mjs`：新增首次启动体验静态验证。
+- `backend/app/jobs.py`：增加本机 Codex 可用性判断。
+- `backend/app/main.py`：无 API 配置且无 Codex CLI 时即时返回可理解错误。
+- `backend/tests/test_api.py`：补充无配置/无 Codex 的拒绝测试，并固定相关测试环境假设。
+- `README.md`、`docs/ONE_CLICK_START.md`、`docs/QUICK_START.md`：同步首次启动、API 配置和断连处理说明。
+- `progress.md`：追加本轮启动体验补全和验证记录。
+- 回滚方式：用 `git revert` 回退本轮提交；若尚未提交，可用 `git checkout -- <上述文件>` 并删除 `frontend/tests/startup-experience.test.mjs`。
+
+## 2026-06-20 - Task: 重新发布 Windows 首启修复版本
+### What was done
+- 将项目版本号更新为 `2.0.1`，用于发布包含 Windows 首次启动修复的新版包。
+- 更新 README 下载入口和 GitHub Release 文案，使发布包名称与 `ai-workbench-windows-2.0.1.zip` 对齐。
+- 本地生成 Windows 发布包预检，确认打包脚本能产出新版 zip。
+
+### Testing
+- `npm --prefix frontend test`：通过，2 个前端测试文件全部通过。
+- `npm run test:backend`：通过，51 passed。
+- `npm run build:web`：通过，Vite 构建成功。
+- PowerShell 脚本解析检查：`start.ps1` 和 `start-lan.ps1` 均通过 `scriptblock` 解析。
+- `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\package-windows.ps1`：通过，生成 `dist\release\ai-workbench-windows-2.0.1.zip`。
+
+### Notes
+- `package.json`：版本号更新为 `2.0.1`。
+- `README.md`：下载入口和 zip 文件名更新到 `v2.0.1`。
+- `.github/workflows/release.yml`：Release 说明更新为本轮首启体验修复内容。
+- `dist/release/ai-workbench-windows-2.0.1.zip`：本地预检生成的发布资产，位于 git 忽略目录。
+- `progress.md`：追加本轮重新发布准备记录。
+- 回滚方式：用 `git revert` 回退本轮提交；若只清理本地预检资产，删除 `dist/release/ai-workbench-windows-2.0.1.zip`。
+
+## 2026-06-20 - Task: 校验 Windows 2.0.1 发布包内容
+### What was done
+- 检查本地预检 zip 的关键文件清单，确认新版发布包包含 Windows 启动脚本和前端源码。
+
+### Testing
+- 检查 `dist\release\ai-workbench-windows-2.0.1.zip`：包含 `start.bat`、`start.ps1`、`start-lan.ps1`、`install.bat`、`package.json`、`frontend/src/main.tsx`。
+
+### Notes
+- `progress.md`：追加本轮发布包内容校验记录。
+- 回滚方式：用 `git revert` 回退本轮提交；本地 zip 可删除 `dist/release/ai-workbench-windows-2.0.1.zip` 后重新生成。

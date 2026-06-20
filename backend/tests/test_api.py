@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 
 import app.main as main_module
+import app.jobs as jobs_module
 from app.main import create_app
 
 
@@ -133,7 +134,8 @@ def test_delete_provider_removes_saved_profile(tmp_path):
     assert client.get("/api/providers").json() == []
 
 
-def test_create_job_enqueues_pending_job(tmp_path):
+def test_create_job_enqueues_pending_job(tmp_path, monkeypatch):
+    monkeypatch.setattr(jobs_module.shutil, "which", lambda name: "codex" if name == "codex" else None)
     app = create_app(data_dir=tmp_path, start_worker=False)
     client = TestClient(app)
 
@@ -154,7 +156,28 @@ def test_create_job_enqueues_pending_job(tmp_path):
     assert body["status"] == "pending"
 
 
-def test_create_job_rejects_non_string_output_path(tmp_path):
+def test_create_job_without_provider_requires_codex_cli(tmp_path, monkeypatch):
+    monkeypatch.setattr(jobs_module.shutil, "which", lambda name: None)
+    app = create_app(data_dir=tmp_path, start_worker=False)
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/jobs",
+        json={
+            "skillType": "auto",
+            "prompt": "polish this abstract into Nature style English",
+            "fileIds": [],
+            "options": {},
+            "providerProfileId": None,
+        },
+    )
+
+    assert response.status_code == 400
+    assert "API 配置" in response.json()["detail"]
+
+
+def test_create_job_rejects_non_string_output_path(tmp_path, monkeypatch):
+    monkeypatch.setattr(jobs_module.shutil, "which", lambda name: "codex" if name == "codex" else None)
     app = create_app(data_dir=tmp_path, start_worker=False)
     client = TestClient(app)
 

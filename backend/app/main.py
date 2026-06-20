@@ -212,6 +212,11 @@ def create_app(data_dir: Path | None = None, start_worker: bool = True) -> FastA
         skill_type = classify_skill_type(payload.prompt) if payload.skill_type == "auto" else payload.skill_type
         if skill_type not in {skill.id for skill in list_skills()}:
             raise HTTPException(status_code=400, detail=f"Unknown skill type: {skill_type}")
+        if not payload.provider_profile_id and not manager.can_run_default_provider():
+            raise HTTPException(
+                status_code=400,
+                detail="请先在设置中保存一个 API 配置。只有已经安装 Codex CLI 的电脑才可以使用本机 Codex 模式。",
+            )
 
         # 处理自定义输出路径
         options = payload.options.copy()

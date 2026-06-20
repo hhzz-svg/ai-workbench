@@ -23,12 +23,12 @@ jobs:
         with:
           name: AI Workbench ${{ github.ref_name }}
           body: |
-            首个 Windows 一键启动包。
+            Windows 一键启动包更新。
 
-            - 支持普通用户通过 API Base URL + API Key 使用
-            - 本机 Codex CLI 改为可选
-            - 更新 README 首屏与新面板演示视频
-            - 内置示例资料和 Windows 启动脚本
+            - 补齐并加固 start.bat/start.ps1/start-lan.ps1 启动链路
+            - 首次无 API 配置时引导到设置，避免任务后台失败
+            - 前端增加本地后端断连提示和重新连接入口
+            - 内置示例资料、使用文档和 Windows 启动脚本
 
             安装方式：下载 zip 后解压，先运行 install.bat，再运行 start.bat。
           files: dist/release/*.zip

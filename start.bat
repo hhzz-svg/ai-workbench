@@ -20,6 +20,17 @@ if not exist "frontend\node_modules" (
   )
 )
 
+python -c "import fastapi, uvicorn" >nul 2>&1
+if errorlevel 1 (
+  echo Backend dependencies are missing. Running install.bat first...
+  call "%ROOT%install.bat"
+  if errorlevel 1 (
+    echo Install failed. Please check the install window output.
+    pause
+    exit /b 1
+  )
+)
+
 echo Starting AI Workbench...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%ROOT%start.ps1"
 

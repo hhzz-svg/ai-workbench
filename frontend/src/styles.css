@@ -631,6 +631,47 @@ textarea:focus {
   gap: var(--s4);
 }
 
+.connection-banner,
+.setup-callout {
+  border: 1px solid var(--st-failed-fg);
+  background: var(--st-failed-bg);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: var(--s3);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--s3);
+}
+
+.connection-banner > svg,
+.setup-callout > svg {
+  color: var(--st-failed-fg);
+}
+
+.connection-banner strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.connection-banner span,
+.setup-callout span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.setup-callout {
+  border-color: var(--border-strong);
+  background: var(--brand-tint);
+}
+
+.setup-callout > svg {
+  color: var(--brand-strong);
+}
+
 .topbar,
 .detail-header,
 .artifact-meta {
@@ -1486,6 +1527,16 @@ button.metric:hover {
   .quick-config-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .connection-banner,
+  .setup-callout {
+    grid-template-columns: auto 1fr;
+  }
+
+  .connection-banner .secondary-button,
+  .setup-callout .secondary-button {
+    grid-column: 1 / -1;
   }
 
   .artifact-actions {

@@ -46,6 +46,7 @@ import type {
   JobStatus,
   ProviderPayload,
   ProviderProfile,
+  HealthStatus,
   SkillInfo,
   UploadedFile
 } from "./types";
@@ -140,6 +141,8 @@ const emptyProviderForm: ProviderPayload = {
   api_key: ""
 };
 
+const backendConnectionHint = "无法连接到本地后端。请保持 start.bat 窗口打开，或重新运行 start.bat 后再点“重新连接”。";
+
 type Notice = { kind: "success" | "error" | "info"; text: string };
 
 type ProductTemplate = {
@@ -209,6 +212,8 @@ function App() {
   const [skills, setSkills] = useState<SkillInfo[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [providers, setProviders] = useState<ProviderProfile[]>([]);
+  const [health, setHealth] = useState<HealthStatus | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [events, setEvents] = useState<JobEvent[]>([]);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
@@ -217,17 +222,22 @@ function App() {
   const selectedJob = jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null;
 
   const refresh = async () => {
-    const [skillRows, jobRows, providerRows] = await Promise.all([api.skills(), api.jobs(), api.providers()]);
+    const [healthRow, skillRows, jobRows, providerRows] = await Promise.all([api.health(), api.skills(), api.jobs(), api.providers()]);
+    setHealth(healthRow);
     setSkills(skillRows);
     setJobs(jobRows);
     setProviders(providerRows);
+    setConnectionError(null);
     if (!selectedJobId || !jobRows.some((job) => job.id === selectedJobId)) {
       setSelectedJobId(jobRows[0]?.id ?? null);
     }
   };
 
   useEffect(() => {
-    refresh().catch(console.error);
+    refresh().catch((error) => {
+      setConnectionError(error instanceof Error ? error.message : backendConnectionHint);
+      console.error(error);
+    });
   }, []);
 
   useEffect(() => {
@@ -237,7 +247,7 @@ function App() {
     }
     api.artifacts(selectedJob.id).then(setArtifacts).catch(() => setArtifacts([]));
     if (selectedJob.status !== "running" && selectedJob.status !== "pending") return;
-    const source = new EventSource(`/api/jobs/${selectedJob.id}/events`);
+    const source = new EventSource(api.eventUrl(selectedJob.id));
     source.onmessage = (message) => {
       const event = JSON.parse(message.data) as JobEvent;
       setEvents((current) => [...current.slice(-120), event]);
@@ -303,13 +313,30 @@ function App() {
           </button>
         </div>
         {view === "create" ? (
-          <CreateJob providers={providers} onCreated={(job) => { setSelectedJobId(job.id); refresh(); }} />
+          <CreateJob
+            providers={providers}
+            codexAvailable={health?.codex_available ?? false}
+            onConfigureApi={() => setView("settings")}
+            onCreated={(job) => { setSelectedJobId(job.id); refresh(); }}
+          />
         ) : (
           <SettingsPanel skills={skills} onSaved={refresh} providers={providers} />
         )}
       </aside>
 
       <section className="workspace">
+        {connectionError && (
+          <div className="connection-banner" role="alert">
+            <PlugZap size={18} />
+            <div>
+              <strong>无法连接到本地后端</strong>
+              <span>{connectionError}</span>
+            </div>
+            <button className="secondary-button" type="button" onClick={() => refresh().catch((error) => setConnectionError(error instanceof Error ? error.message : backendConnectionHint))}>
+              <RefreshCcw size={16} /> 重新连接
+            </button>
+          </div>
+        )}
         <header className="topbar">
           <div>
             <span className="eyebrow"><LayoutDashboard size={14} /> 本地创作中心</span>
@@ -536,7 +563,17 @@ function DirectoryPicker({
   );
 }
 
-function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onCreated: (job: Job) => void }) {
+function CreateJob({
+  providers,
+  codexAvailable,
+  onConfigureApi,
+  onCreated
+}: {
+  providers: ProviderProfile[];
+  codexAvailable: boolean;
+  onConfigureApi: () => void;
+  onCreated: (job: Job) => void;
+}) {
   const [providerId, setProviderId] = useState<string>("");
   const [prompt, setPrompt] = useState("");
   const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -553,6 +590,7 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
   const [styleCustom, setStyleCustom] = useState<Record<string, string>>({});
   const [referenceNote, setReferenceNote] = useState("");
   const [referenceFiles, setReferenceFiles] = useState<UploadedFile[]>([]);
+  const [formNotice, setFormNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
     if (!providerId && providers.length > 0) {
@@ -661,6 +699,11 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
     if (!prompt.trim()) {
       return;
     }
+    if (!providerId && !codexAvailable) {
+      setFormNotice({ kind: "error", text: "请先保存一个 API 配置。只有已经安装 Codex CLI 的电脑才可以使用本机 Codex 模式。" });
+      onConfigureApi();
+      return;
+    }
     setBusy(true);
     try {
       const constraints = [...selectedConstraints, customConstraints.trim()].filter(Boolean);
@@ -709,7 +752,7 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
       setReferenceFiles([]);
       onCreated(job);
     } catch (error) {
-      alert(`创建任务失败：${error instanceof Error ? error.message : "未知错误"}`);
+      setFormNotice({ kind: "error", text: `创建任务失败：${error instanceof Error ? error.message : "未知错误"}` });
     } finally {
       setBusy(false);
     }
@@ -766,6 +809,15 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
         </select>
         <small className="input-hint">推荐在设置中保存 API 配置；不选配置时才使用本机 Codex 环境。</small>
       </label>
+      {providers.length === 0 && (
+        <div className="setup-callout">
+          <KeyRound size={17} />
+          <span>{codexAvailable ? "首次使用建议先保存一个 API 配置；也可以继续使用本机 Codex。" : "首次使用请先保存一个 API 配置，普通用户不需要安装 Codex CLI。"}</span>
+          <button type="button" className="secondary-button" onClick={onConfigureApi}>
+            去设置 API
+          </button>
+        </div>
+      )}
 
       <label>
         具体需求
@@ -912,6 +964,7 @@ function CreateJob({ providers, onCreated }: { providers: ProviderProfile[]; onC
         </div>
       )}
 
+      {formNotice && <p className={`notice ${formNotice.kind}`}>{formNotice.text}</p>}
       <button className="primary-button" disabled={busy || !prompt.trim()}>
         <Play size={18} /> {busy ? "创建中..." : "开始生成"}
       </button>

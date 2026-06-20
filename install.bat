@@ -1,6 +1,14 @@
 @echo off
 chcp 65001 >nul
 setlocal EnableDelayedExpansion
+set "ROOT=%~dp0"
+cd /d "%ROOT%"
+
+if not exist "backend\requirements.txt" (
+    echo Error: please run install.bat from the AI Workbench project folder.
+    pause
+    exit /b 1
+)
 
 echo.
 echo ========================================
