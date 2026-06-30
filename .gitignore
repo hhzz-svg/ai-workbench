@@ -127,3 +127,6 @@ keys/
 *.dll
 *.so
 *.dylib
+
+# Local isolated worktrees
+.worktrees/

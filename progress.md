@@ -192,3 +192,13 @@
 - `docs/superpowers/plans/2026-06-30-task-first-workbench.md`：新增可逐步执行的 UI 改造实施计划。
 - `progress.md`：追加本轮计划与计划自检记录。
 - 回滚方式：提交后使用 `git revert <本轮计划提交>`；未提交时删除计划文档并回退 `progress.md` 本轮追加段落。
+
+## 2026-06-30 - Task: 建立 UI 改造隔离工作区规则
+### What was done
+- 为任务优先工作台施工增加仓库内 `.worktrees/` 忽略规则，避免隔离工作区内容进入版本控制。
+### Testing
+- `git check-ignore -v .worktrees`：确认 `.worktrees/` 命中仓库忽略规则。
+### Notes
+- `.gitignore`：新增本地隔离工作区目录忽略规则。
+- `progress.md`：追加本轮隔离工作区准备记录。
+- 回滚方式：提交后使用 `git revert <本轮准备提交>`；未提交时删除 `.gitignore` 中的 `.worktrees/` 规则并回退本轮日志段落。
