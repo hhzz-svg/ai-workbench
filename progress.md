@@ -166,3 +166,17 @@
 ### Notes
 - `progress.md`：追加本轮发布包内容校验记录。
 - 回滚方式：用 `git revert` 回退本轮提交；本地 zip 可删除 `dist/release/ai-workbench-windows-2.0.1.zip` 后重新生成。
+
+## 2026-06-30 - Task: 调研并确定任务优先的工作台 UI 改造设计
+### What was done
+- 审计当前工作台的信息架构与浏览器实况，确认创建表单常驻左栏、任务列表与详情纵向堆叠是界面臃肿的主要原因。
+- 调研 Dify、n8n、Open WebUI 与 Plane 的工作区、执行记录和对象管理模式，比较三种改造方案。
+- 确定“任务中心 + 独立新建页 + 独立设置页”为采用方案，并明确布局、响应式规则、数据流、实现边界和验收标准。
+### Testing
+- 对照当前 `frontend/src/main.tsx` 和 `frontend/src/styles.css` 完成设计可行性检查；方案复用现有组件与 API，不涉及后端协议、数据库或任务执行规则。
+- 使用 Playwright 打开 `http://127.0.0.1:5173` 并读取页面结构，确认当前首屏同时包含完整创建表单、任务指标、任务列表和详情区域。
+- 自检设计文档，无 `TBD`、`TODO`、占位条目、范围矛盾或未决方案。
+### Notes
+- `docs/superpowers/specs/2026-06-30-task-first-workbench-design.md`：新增任务优先工作台调研与设计规范。
+- `progress.md`：追加本轮调研、设计与验证记录。
+- 回滚方式：提交后使用 `git revert <本轮设计提交>`；未提交时删除设计文档并回退 `progress.md` 本轮追加段落。
