@@ -28,7 +28,6 @@ import {
   PlugZap,
   RefreshCcw,
   Settings,
-  ShieldCheck,
   Sparkles,
   Trash2,
   Upload,
@@ -217,7 +216,7 @@ function App() {
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [events, setEvents] = useState<JobEvent[]>([]);
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
-  const [view, setView] = useState<"create" | "settings">("create");
+  const [view, setView] = useState<"jobs" | "create" | "settings">("jobs");
   const [statusFilter, setStatusFilter] = useState<JobStatus | "all">("all");
   const selectedJob = jobs.find((job) => job.id === selectedJobId) ?? jobs[0] ?? null;
 
@@ -294,6 +293,24 @@ function App() {
 
   const unfinishedCount = grouped.failed.length + grouped.canceled.length;
 
+  const pageCopy = {
+    jobs: {
+      eyebrow: "本地创作中心",
+      title: "任务中心",
+      description: "集中查看生成进度、运行记录和交付产物。"
+    },
+    create: {
+      eyebrow: "开始创作",
+      title: "新建任务",
+      description: "选择创作方向，补充需求和资料后开始生成。"
+    },
+    settings: {
+      eyebrow: "工作台配置",
+      title: "设置",
+      description: "管理模型连接和本机运行能力。"
+    }
+  } as const;
+
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -304,24 +321,27 @@ function App() {
             <p>资料到演示、海报和学术文稿</p>
           </div>
         </div>
-        <div className="segmented" aria-label="页面切换">
+        <nav className="nav-list" aria-label="主导航">
+          <button type="button" className={view === "jobs" ? "active" : ""} onClick={() => setView("jobs")}>
+            <LayoutDashboard size={18} />
+            <span><strong>任务中心</strong><small>查看进度与产物</small></span>
+          </button>
           <button type="button" className={view === "create" ? "active" : ""} onClick={() => setView("create")}>
-            <Play size={16} /> 新建
+            <Play size={18} />
+            <span><strong>新建任务</strong><small>选择方向并生成</small></span>
           </button>
           <button type="button" className={view === "settings" ? "active" : ""} onClick={() => setView("settings")}>
-            <Settings size={16} /> 设置
+            <Settings size={18} />
+            <span><strong>设置</strong><small>模型与运行配置</small></span>
           </button>
+        </nav>
+        <div className="sidebar-status">
+          <span className={health?.ok ? "status-dot online" : "status-dot"} />
+          <div>
+            <strong>{health?.ok ? "本地服务已连接" : "等待本地服务"}</strong>
+            <small>{health?.codex_available ? "Codex 环境可用" : "使用已保存的 API 配置"}</small>
+          </div>
         </div>
-        {view === "create" ? (
-          <CreateJob
-            providers={providers}
-            codexAvailable={health?.codex_available ?? false}
-            onConfigureApi={() => setView("settings")}
-            onCreated={(job) => { setSelectedJobId(job.id); refresh(); }}
-          />
-        ) : (
-          <SettingsPanel skills={skills} onSaved={refresh} providers={providers} />
-        )}
       </aside>
 
       <section className="workspace">
@@ -337,91 +357,126 @@ function App() {
             </button>
           </div>
         )}
-        <header className="topbar">
+        <header className="page-header">
           <div>
-            <span className="eyebrow"><LayoutDashboard size={14} /> 本地创作中心</span>
-            <h2>生成看板</h2>
-            <p>把需求、资料、进度和成果放在同一个工作流里。</p>
+            <span className="eyebrow"><LayoutDashboard size={14} /> {pageCopy[view].eyebrow}</span>
+            <h2>{pageCopy[view].title}</h2>
+            <p>{pageCopy[view].description}</p>
           </div>
-          <div className="topbar-right">
-            <div className="run-badges">
-              <span><ShieldCheck size={15} /> 本机运行</span>
-              <span><Clock3 size={15} /> 队列处理</span>
-            </div>
-            <div className="toolbar">
-              <button className="ghost-button" type="button" onClick={clearFailed} disabled={unfinishedCount === 0}>
-                <Trash2 size={17} /> 清理未完成
-              </button>
-              <button className="icon-button" type="button" onClick={() => refresh()} title="刷新">
-                <RefreshCcw size={18} />
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <section className="summary-grid" aria-label="任务概览">
-          <Metric label="待处理" value={grouped.pending.length + grouped.needs_input.length} tone="amber"
-            active={statusFilter === "pending"}
-            onClick={() => setStatusFilter((current) => (current === "pending" ? "all" : "pending"))} />
-          <Metric label="生成中" value={grouped.running.length} tone="blue"
-            active={statusFilter === "running"}
-            onClick={() => setStatusFilter((current) => (current === "running" ? "all" : "running"))} />
-          <Metric label="已交付" value={grouped.succeeded.length} tone="green"
-            active={statusFilter === "succeeded"}
-            onClick={() => setStatusFilter((current) => (current === "succeeded" ? "all" : "succeeded"))} />
-          <Metric label="可清理" value={unfinishedCount} tone="red"
-            active={statusFilter === "failed"}
-            onClick={() => setStatusFilter((current) => (current === "failed" ? "all" : "failed"))} />
-        </section>
-
-        <section className="job-list" aria-label="任务列表">
-          <div className="job-list-head">
-            <h3><ListFilter size={16} /> 任务列表</h3>
-            {statusFilter === "all" ? (
-              <span className="filter-state">{visibleJobs.length} 个任务</span>
+          <div className="page-actions">
+            {view === "jobs" ? (
+              <>
+                <button className="ghost-button" type="button" onClick={clearFailed} disabled={unfinishedCount === 0}>
+                  <Trash2 size={17} /> 清理未完成
+                </button>
+                <button className="icon-button" type="button" onClick={() => refresh()} title="刷新">
+                  <RefreshCcw size={18} />
+                </button>
+                <button className="primary-button compact" type="button" onClick={() => setView("create")}>
+                  <Play size={17} /> 新建任务
+                </button>
+              </>
             ) : (
-              <button type="button" className="clear-filter" onClick={() => setStatusFilter("all")}>
-                仅看「{statusLabels[statusFilter]}」· 清除筛选
+              <button className="ghost-button" type="button" onClick={() => setView("jobs")}>
+                <CornerLeftUp size={17} /> 返回任务中心
               </button>
             )}
           </div>
-          {visibleJobs.length === 0 ? (
-            <p className="job-list-empty">
-              {statusFilter === "all" ? "还没有任务，从左侧新建一个开始。" : "该状态下暂无任务。"}
-            </p>
-          ) : (
-            visibleJobs.map((job) => (
-              <button
-                key={job.id}
-                type="button"
-                className={`job-row ${selectedJob?.id === job.id ? "selected" : ""}`}
-                onClick={() => { setSelectedJobId(job.id); setEvents([]); }}
-              >
-                <span className={`job-status ${job.status}`}>{statusLabels[job.status]}</span>
-                <span className="job-row-main">
-                  <strong>{typeName(job.skill_type)}</strong>
-                  <small>{job.prompt.slice(0, 140)}</small>
-                </span>
-                <span className="job-row-time">{formatDate(job.updated_at)}</span>
-                <span className="job-row-caret"><ChevronRight size={16} /></span>
-              </button>
-            ))
-          )}
-        </section>
+        </header>
 
-        {selectedJob ? (
-          <JobDetail
-            job={selectedJob}
-            artifacts={artifacts}
-            events={events}
-            onCancel={async () => { await api.cancelJob(selectedJob.id); refresh(); }}
-            onDelete={() => deleteJob(selectedJob.id)}
-          />
-        ) : (
-          <div className="empty-state">
-            <WandSparkles size={24} />
-            <span>新建一个任务后，这里会显示进度、记录和产物。</span>
-            <span className="empty-cta">在左侧选择一个方向、补充需求，点击「开始生成」。</span>
+        {view === "jobs" && (
+          <>
+            <section className="summary-grid" aria-label="任务概览">
+              <Metric label="待处理" value={grouped.pending.length + grouped.needs_input.length} tone="amber"
+                active={statusFilter === "pending"}
+                onClick={() => setStatusFilter((current) => (current === "pending" ? "all" : "pending"))} />
+              <Metric label="生成中" value={grouped.running.length} tone="blue"
+                active={statusFilter === "running"}
+                onClick={() => setStatusFilter((current) => (current === "running" ? "all" : "running"))} />
+              <Metric label="已交付" value={grouped.succeeded.length} tone="green"
+                active={statusFilter === "succeeded"}
+                onClick={() => setStatusFilter((current) => (current === "succeeded" ? "all" : "succeeded"))} />
+              <Metric label="可清理" value={unfinishedCount} tone="red"
+                active={statusFilter === "failed"}
+                onClick={() => setStatusFilter((current) => (current === "failed" ? "all" : "failed"))} />
+            </section>
+
+            <div className="task-layout">
+              <section className="job-list" aria-label="任务列表">
+                <div className="job-list-head">
+                  <h3><ListFilter size={16} /> 任务列表</h3>
+                  {statusFilter === "all" ? (
+                    <span className="filter-state">{visibleJobs.length} 个任务</span>
+                  ) : (
+                    <button type="button" className="clear-filter" onClick={() => setStatusFilter("all")}>
+                      仅看「{statusLabels[statusFilter]}」· 清除筛选
+                    </button>
+                  )}
+                </div>
+                {visibleJobs.length === 0 ? (
+                  <p className="job-list-empty">
+                    {statusFilter === "all" ? "还没有任务，点击右上角“新建任务”开始。" : "该状态下暂无任务。"}
+                  </p>
+                ) : (
+                  visibleJobs.map((job) => (
+                    <button
+                      key={job.id}
+                      type="button"
+                      className={`job-row ${selectedJob?.id === job.id ? "selected" : ""}`}
+                      onClick={() => { setSelectedJobId(job.id); setEvents([]); }}
+                    >
+                      <span className={`job-status ${job.status}`}>{statusLabels[job.status]}</span>
+                      <span className="job-row-main">
+                        <strong>{typeName(job.skill_type)}</strong>
+                        <small>{job.prompt.slice(0, 140)}</small>
+                      </span>
+                      <span className="job-row-time">{formatDate(job.updated_at)}</span>
+                      <span className="job-row-caret"><ChevronRight size={16} /></span>
+                    </button>
+                  ))
+                )}
+              </section>
+
+              {selectedJob ? (
+                <JobDetail
+                  job={selectedJob}
+                  artifacts={artifacts}
+                  events={events}
+                  onCancel={async () => { await api.cancelJob(selectedJob.id); refresh(); }}
+                  onDelete={() => deleteJob(selectedJob.id)}
+                />
+              ) : (
+                <div className="empty-state">
+                  <WandSparkles size={24} />
+                  <strong>还没有任务</strong>
+                  <span>创建第一个任务后，这里会集中显示进度、记录和产物。</span>
+                  <button className="primary-button compact" type="button" onClick={() => setView("create")}>
+                    <Play size={17} /> 新建任务
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {view === "create" && (
+          <div className="page-content form-page">
+            <CreateJob
+              providers={providers}
+              codexAvailable={health?.codex_available ?? false}
+              onConfigureApi={() => setView("settings")}
+              onCreated={(job) => {
+                setSelectedJobId(job.id);
+                setView("jobs");
+                refresh();
+              }}
+            />
+          </div>
+        )}
+
+        {view === "settings" && (
+          <div className="page-content form-page">
+            <SettingsPanel skills={skills} onSaved={refresh} providers={providers} />
           </div>
         )}
       </section>

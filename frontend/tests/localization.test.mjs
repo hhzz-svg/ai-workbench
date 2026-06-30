@@ -10,7 +10,7 @@ const html = readFileSync(join(root, "index.html"), "utf8");
 
 for (const text of [
   "创作工作台",
-  "生成看板",
+  "任务中心",
   "开始生成",
   "清理未完成",
   "删除任务",
