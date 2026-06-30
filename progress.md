@@ -202,3 +202,27 @@
 - `.gitignore`：新增本地隔离工作区目录忽略规则。
 - `progress.md`：追加本轮隔离工作区准备记录。
 - 回滚方式：提交后使用 `git revert <本轮准备提交>`；未提交时删除 `.gitignore` 中的 `.worktrees/` 规则并回退本轮日志段落。
+
+## 2026-06-30 - Task: 实现任务优先工作台 UI
+### What was done
+- 将工作台默认入口改为“任务中心”，用左侧固定主导航替代原先常驻创建表单，降低首屏信息密度。
+- 将“新建任务”和“设置”改为独立主内容页，任务中心保留任务概览、列表和详情主从布局。
+- 增加任务优先布局静态契约测试，并同步更新中文界面文案测试。
+- 创建任务成功后会返回任务中心并选中新任务，保留现有任务、SSE、产物和配置接口行为。
+
+### Testing
+- `node frontend\tests\workbench-layout.test.mjs`：通过，确认默认任务中心、三项主导航、任务主从布局和响应式 CSS 契约。
+- `node frontend\tests\localization.test.mjs`：通过，确认中文核心文案包含新的“任务中心”入口。
+- `npm --prefix frontend test`：通过，3 个前端测试文件全部通过。
+- `npm run build:web`：通过，TypeScript 与 Vite 构建成功。
+- 本地启动 `python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000` 与 `npm --prefix frontend run dev -- --host 127.0.0.1`：`/api/health` 返回 `ok: true`，前端首页返回 HTTP 200。
+- Playwright CLI 浏览器验收：1440px 下默认显示“任务中心”、主导航包含“任务中心 / 新建任务 / 设置”、`.task-layout` 计算为双栏 `420.359px 735.641px`；点击“新建任务”和“设置”分别只显示对应独立页面；768px 下 `.task-layout` 计算为单栏 `500px`，`scrollWidth` 等于 `innerWidth`，无横向溢出；console error 为 0。
+
+### Notes
+- `frontend/tests/workbench-layout.test.mjs`：新增任务优先工作台结构与响应式样式契约测试。
+- `frontend/tests/localization.test.mjs`：将核心中文入口文案从“生成看板”更新为“任务中心”。
+- `frontend/src/main.tsx`：新增 `jobs/create/settings` 三页状态、主导航、页面头部和任务中心条件渲染。
+- `frontend/src/styles.css`：新增紧凑侧栏、主导航、页面头部、任务主从布局和响应式规则。
+- `docs/UPDATES_V2.md`：追加任务优先工作台使用变化说明。
+- `progress.md`：追加本轮实现、验证和回滚记录。
+- 回滚方式：提交后执行 `git revert e31ddf1 fba98c4` 回退实现与结构测试；如需同时移除本轮文档记录，再回退后续文档提交。
