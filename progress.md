@@ -272,3 +272,21 @@
 - `docs/CLOUDFLARE_DOMAIN.md`: documented the Worker redirect route and current free protection posture.
 - `progress.md`: appended this verification and rollback record.
 - Rollback: run `git revert <this-commit>` for repository documentation/title changes; in Cloudflare, delete route `www.aihzcc.top/*` and Worker `aihzcc-www-redirect` to remove the redirect.
+
+## 2026-07-02 - Task: Rework aihzcc.top as public portfolio homepage
+### What was done
+- Repositioned `aihzcc.top` from a self-facing project page into a visitor-facing public portfolio homepage.
+- Added public live website cards for Zombie Survivor, AI Workbench, Cloud Mail, NJU Study Dashboard, and HHZZ6667.
+- Added repository cards for the main public GitHub projects, with audience-oriented descriptions and direct demo/source links.
+- Updated Cloudflare domain documentation to describe the public homepage positioning and the project inventory shown on the page.
+
+### Testing
+- Verified live URLs with `curl -I`: `zombie-survivor.huz43462.workers.dev`, `ai-workbench-cvs.pages.dev`, `nju-study-dashboard.pages.dev`, `hhzz6667.pages.dev`, and `skymail.ink` returned HTTP 200.
+- Parsed `landing-page/index.html` with Python `html.parser` successfully.
+- Verified the new homepage content includes `Zombie Survivor`, `Cloud Mail`, `hidden-state-risk-probing`, and `NJU Study Dashboard`.
+
+### Notes
+- `landing-page/index.html`: replaced the previous self-facing homepage with a public portfolio and project index.
+- `docs/CLOUDFLARE_DOMAIN.md`: updated the domain purpose and listed the live websites/repositories represented on the homepage.
+- `progress.md`: appended this implementation and verification record.
+- Rollback: run `git revert <this-commit>` to restore the previous homepage and documentation.
