@@ -245,3 +245,14 @@
 - `README.md`: changed the online display URL to `https://aihzcc.top/` and clarified that it is a Pages-hosted project entry page.
 - `docs/CLOUDFLARE_DOMAIN.md`: documented domain routing, Pages files, and rollback path.
 - Rollback????? `git revert <this-commit>` ?????????????????? Cloudflare ?? `aihzcc.top` / `www.aihzcc.top` ? Pages custom domain ??? CNAME?
+
+## 2026-07-02 - Task: Update README canonical homepage URL
+### What was done
+- Updated the README online display link so readers use `https://aihzcc.top/` as the canonical Cloudflare Pages homepage.
+
+### Testing
+- Verified README now contains `https://aihzcc.top/` and preserves the `ai-workbench-cvs.pages.dev` fallback reference.
+
+### Notes
+- `README.md`: changed the displayed Pages URL to the custom domain while retaining the Pages.dev fallback.
+- Rollback????? `git revert <this-commit>` ?? README ?????
