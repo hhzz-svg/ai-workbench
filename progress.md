@@ -256,3 +256,19 @@
 ### Notes
 - `README.md`: changed the displayed Pages URL to the custom domain while retaining the Pages.dev fallback.
 - Rollback: run `git revert <this-commit>` to restore the README link change.
+
+## 2026-07-02 - Task: Add Worker canonical redirect for www.aihzcc.top
+### What was done
+- Added a Cloudflare Worker route for `www.aihzcc.top/*` so `www.aihzcc.top` performs a real 301 redirect to `https://aihzcc.top/`.
+- Updated the domain documentation to reflect the Worker route and the free Cloudflare protections currently in use.
+- Normalized the landing page title separators to ASCII hyphens to avoid mojibake in Windows shell verification output.
+
+### Testing
+- Cloudflare API confirmed Worker `aihzcc-www-redirect` exists and route `www.aihzcc.top/*` points to it.
+- Parsed `landing-page/index.html` with Python `html.parser` after the title cleanup.
+
+### Notes
+- `landing-page/index.html`: replaced non-ASCII separator glyphs with ASCII hyphens.
+- `docs/CLOUDFLARE_DOMAIN.md`: documented the Worker redirect route and current free protection posture.
+- `progress.md`: appended this verification and rollback record.
+- Rollback: run `git revert <this-commit>` for repository documentation/title changes; in Cloudflare, delete route `www.aihzcc.top/*` and Worker `aihzcc-www-redirect` to remove the redirect.
