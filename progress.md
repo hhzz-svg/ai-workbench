@@ -244,7 +244,7 @@
 - `landing-page/_headers`: added baseline static-site security headers.
 - `README.md`: changed the online display URL to `https://aihzcc.top/` and clarified that it is a Pages-hosted project entry page.
 - `docs/CLOUDFLARE_DOMAIN.md`: documented domain routing, Pages files, and rollback path.
-- Rollback????? `git revert <this-commit>` ?????????????????? Cloudflare ?? `aihzcc.top` / `www.aihzcc.top` ? Pages custom domain ??? CNAME?
+- Rollback: run `git revert <this-commit>` to restore repository files; if the domain binding should also be removed, delete the `aihzcc.top` / `www.aihzcc.top` Pages custom domains and their CNAME records in Cloudflare.
 
 ## 2026-07-02 - Task: Update README canonical homepage URL
 ### What was done
@@ -255,4 +255,4 @@
 
 ### Notes
 - `README.md`: changed the displayed Pages URL to the custom domain while retaining the Pages.dev fallback.
-- Rollback????? `git revert <this-commit>` ?? README ?????
+- Rollback: run `git revert <this-commit>` to restore the README link change.
