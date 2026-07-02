@@ -1,35 +1,28 @@
-# Cloudflare domain setup
+# Cloudflare Pages domain setup
 
-`aihzcc.top` is the canonical public portfolio homepage for Huz Lab. It introduces public repositories, live Pages/Workers websites, and project demos for external visitors. The site is deployed by Cloudflare Pages from this repository.
+This repository owns the AI Workbench project showcase page, not the personal portfolio homepage. The public showcase is deployed by Cloudflare Pages from `landing-page/`.
 
 ## Current routing
 
-- `aihzcc.top` -> Cloudflare Pages project `ai-workbench` (`ai-workbench-cvs.pages.dev`)
-- `www.aihzcc.top` -> Worker route `www.aihzcc.top/*` using Worker `aihzcc-www-redirect`, which returns a 301 redirect to `https://aihzcc.top/` while preserving the path and query string.
+- Project showcase URL: `https://ai-workbench-cvs.pages.dev/`
+- The Cloudflare Pages project name is `ai-workbench`.
+- `aihzcc.top` and `www.aihzcc.top` may still be attached as Cloudflare custom domains at the account level, but the content served by this repository should remain the AI Workbench showcase unless a separate personal-homepage project is created.
+- `www.aihzcc.top` currently has a Worker route `www.aihzcc.top/*` using Worker `aihzcc-www-redirect`, which returns a 301 redirect to `https://aihzcc.top/`.
 - Email Routing remains enabled through Cloudflare MX, SPF, DKIM, and DMARC records.
-
-## Public homepage content
-
-The homepage is visitor-facing, not an internal note page. It highlights:
-
-- Live websites: Zombie Survivor, AI Workbench, Cloud Mail, NJU Study Dashboard, and HHZZ6667.
-- Public repositories: ai-workbench, zombie-survivor, cloud-mail, hidden-state-risk-probing, relay-model-audit, nju-PA, and mean-variance-portfolio.
-- Clear external links to live demos and GitHub repositories.
 
 ## Pages files
 
-- `landing-page/index.html`: public portfolio homepage and project index.
+- `landing-page/index.html`: AI Workbench project showcase page.
 - `landing-page/_redirects`: backup canonical redirect rule for Pages-level routing.
 - `landing-page/_headers`: static security headers for the landing page.
 
-## Cloudflare free protections currently used
+## Protection currently used
 
-- Proxied CNAME records for the apex and `www` hostnames.
-- Cloudflare Pages HTTPS certificate validation for both hostnames.
+- Cloudflare Pages HTTPS certificate validation for attached hostnames.
 - Cloudflare managed Free WAF and L7 DDoS managed rulesets visible on the zone.
 - Static security headers through Pages `_headers`.
 - Email Routing authentication records: MX, SPF, DKIM, and DMARC.
 
 ## Rollback
 
-Revert the commit that changed the files above. If the domain should no longer serve this Pages project, remove the Pages custom domains and point the `aihzcc.top` / `www.aihzcc.top` CNAME records away from `ai-workbench-cvs.pages.dev`. If the `www` redirect should be removed, delete the Worker route `www.aihzcc.top/*` and the Worker `aihzcc-www-redirect`.
+Revert the commit that changed the files above. If a separate personal homepage is needed later, create a new Pages project or Worker and bind `aihzcc.top` to that project instead of changing this repository's AI Workbench showcase page.

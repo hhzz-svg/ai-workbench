@@ -290,3 +290,21 @@
 - `docs/CLOUDFLARE_DOMAIN.md`: updated the domain purpose and listed the live websites/repositories represented on the homepage.
 - `progress.md`: appended this implementation and verification record.
 - Rollback: run `git revert <this-commit>` to restore the previous homepage and documentation.
+
+## 2026-07-02 - Task: Restore AI Workbench Pages showcase
+### What was done
+- Restored `landing-page/index.html` to the original AI Workbench project showcase page from commit `042138aa7e1ef54f71c794d6a96a608bbb4b9cac`.
+- Changed the README online display link back to `https://ai-workbench-cvs.pages.dev/`.
+- Updated the Cloudflare domain documentation to make clear that this repository owns the AI Workbench showcase page, not a personal portfolio homepage.
+
+### Testing
+- Parsed `landing-page/index.html` with Python `html.parser` successfully.
+- Verified the restored page contains `AI Workbench` and no longer contains the public portfolio markers `Huz Lab` or `Zombie Survivor`.
+- Verified README points to `https://ai-workbench-cvs.pages.dev/`.
+
+### Notes
+- `landing-page/index.html`: restored the original project showcase page.
+- `README.md`: restored the project showcase URL.
+- `docs/CLOUDFLARE_DOMAIN.md`: corrected the documentation after reverting the personal-homepage direction.
+- `progress.md`: appended this restore record.
+- Rollback: run `git revert <this-commit>` to return to the previous portfolio-style page, though that is not recommended for this repository.

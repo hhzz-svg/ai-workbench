@@ -23,7 +23,7 @@
 
 ## 🌐 在线展示页
 
-展示页地址：**https://aihzcc.top/ (backup: https://ai-workbench-cvs.pages.dev/)**
+展示页地址：**https://ai-workbench-cvs.pages.dev/**
 
 > 说明：这个地址只是项目介绍和下载入口，不是在线版工作台。当前完整程序需要下载到本地运行，任务执行、模型配置、上传文件和生成结果都保存在自己的电脑上。
 
