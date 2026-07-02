@@ -226,3 +226,22 @@
 - `docs/UPDATES_V2.md`：追加任务优先工作台使用变化说明。
 - `progress.md`：追加本轮实现、验证和回滚记录。
 - 回滚方式：提交后执行 `git revert e31ddf1 fba98c4` 回退实现与结构测试；如需同时移除本轮文档记录，再回退后续文档提交。
+
+## 2026-07-02 - Task: Configure aihzcc.top as personal homepage
+### What was done
+- Replaced the Cloudflare Pages landing page with a polished personal homepage and GitHub project hub for `aihzcc.top`.
+- Added Pages redirect and security header files so `www.aihzcc.top` canonicalizes to the apex domain and the static site ships baseline browser protections.
+- Documented the Cloudflare custom-domain setup and updated the README display URL to the new domain.
+
+### Testing
+- Parsed `landing-page/index.html` with Python `html.parser` successfully.
+- Verified `landing-page/_redirects` contains the `www.aihzcc.top` to `https://aihzcc.top/` 301 redirect rule.
+- Verified `landing-page/_headers` contains static security headers including CSP, frame blocking, nosniff, referrer policy, and permissions policy.
+
+### Notes
+- `landing-page/index.html`: replaced the old product-only landing page with the personal homepage and GitHub project hub.
+- `landing-page/_redirects`: added the canonical `www` to apex redirect.
+- `landing-page/_headers`: added baseline static-site security headers.
+- `README.md`: changed the online display URL to `https://aihzcc.top/` and clarified that it is a Pages-hosted project entry page.
+- `docs/CLOUDFLARE_DOMAIN.md`: documented domain routing, Pages files, and rollback path.
+- Rollback????? `git revert <this-commit>` ?????????????????? Cloudflare ?? `aihzcc.top` / `www.aihzcc.top` ? Pages custom domain ??? CNAME?
